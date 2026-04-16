@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "segwithu"
+version = "0.0.1"
+description = "SegWithU: Uncertainty as Perturbation Energy for Single-Forward-Pass Risk-Aware Medical Image Segmentation"
+license = "Apache-2.0"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Project Neura", email = "central@projectneura.org" },
+    { name = "Tianhao Fu", email = "terry.fu@projectneura.org" },
+    { name = "Austin Wang", email = "austin.wang@projectneura.org"},
+    { name = "Charles Chen", email = "charles.chen@projectneura.org"},
+    { name = "Roby Aldave-Garza", email = "roby.aldave-garze@projectneura.org"},
+    { name = "Yucheng Chen", email = "steven.chen@projectneura.org" }
+]
+dependencies = ["mipcandy", "monai", "torchmetrics"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["segwithu"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["segwithu"]
+
+[project.urls]
+Homepage = "https://github.com/ProjectNeura/SegWithU"
+Documentation = "https://github.com/ProjectNeura/SegWithU"
+Repository = "https://github.com/ProjectNeura/SegWithU"
