@@ -5,4 +5,6 @@
 [![GitHub](https://img.shields.io/badge/Repo-060e1a?style=for-the-badge&logo=github)](https://github.com/ProjectNeura/SegWithU)
 [![Hugging Face](https://img.shields.io/badge/HF-orange?style=for-the-badge&logo=huggingface)](https://huggingface.co/ProjectNeura/SegWithU)
 
-We are working very hard to release the code.
+![architecture](home/assets/swu-arch.png)
+
+We are working very hard to release everything.
