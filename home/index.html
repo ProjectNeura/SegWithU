@@ -35,6 +35,7 @@
   a:hover { text-decoration: underline; }
 
   .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .wrap-wide { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
 
   /* HERO */
   header.hero {
@@ -159,47 +160,229 @@
   }
   .tldr b { font-style: normal; color: var(--accent); font-weight: 600; }
 
-  /* LOGITS (interactive viewer — Plotly iframes) */
+  /* ===================== INTERACTIVE METHOD FIGURE ===================== */
+  .method-figure {
+    margin: 16px 0 20px;
+    background: var(--card);
+    padding: 22px;
+    border-radius: 10px;
+    border: 1px solid var(--rule);
+  }
+  /* Reserve the figure's intrinsic aspect ratio so layout never collapses,
+     even if the PNG fails to load (you'll see a placeholder rather than a strip). */
+  .arch-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3508 / 2481;     /* swu-arch.png native ratio */
+    line-height: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .arch-wrap img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+  /* Visible placeholder if the image fails to load */
+  .arch-wrap::before {
+    content: "swu-arch.png — figure not found at this path";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    padding: 0 24px;
+    z-index: 0;
+  }
+  .arch-wrap img { z-index: 1; }
+  /* hotspots are absolutely-positioned in % over the image */
+  .hot {
+    position: absolute;
+    border: 1.5px dashed rgba(194, 65, 12, 0.35);
+    background: rgba(194, 65, 12, 0.04);
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 0;
+    transition: background .15s ease, box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+    z-index: 2;
+  }
+  .hot:hover, .hot:focus-visible {
+    background: rgba(194, 65, 12, 0.18);
+    border-color: var(--accent);
+    border-style: solid;
+    box-shadow: 0 0 0 4px rgba(194, 65, 12, 0.12);
+    transform: scale(1.02);
+    outline: none;
+  }
+  /* small "click to view" pulse-tag visible on hover */
+  .hot::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -26px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  .hot:hover::after, .hot:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+  }
+  .hot.below::after { top: auto; bottom: -26px; }
+  .hot.below:hover::after, .hot.below:focus-visible::after {
+    transform: translateX(-50%) translateY(2px);
+  }
+
+  .arch-legend {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+  .arch-legend .swatch {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    background: rgba(194, 65, 12, 0.04);
+    border: 1.5px dashed rgba(194, 65, 12, 0.55);
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .method-caption {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    max-width: 860px;
+    margin-top: 16px;
+  }
+  .method-caption b { color: var(--ink); }
+
+  /* ===================== INLINE GALLERY (case-8 maps grid) ===================== */
+  .map-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 22px;
+  }
+  @media (max-width: 900px) {
+    .map-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .map-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .map-tile {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 14px 12px;
+    cursor: pointer;
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    width: 100%;
+  }
+  .map-tile:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    background: var(--card-2);
+  }
+  .map-tile .name {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ink);
+    margin: 0 0 2px;
+  }
+  .map-tile .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .map-tile .meta .arrow {
+    color: var(--accent);
+    margin-left: 4px;
+  }
+
+  /* ===================== INTERACTIVE VIEWER (per-class logits) ===================== */
   .logits-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
+    gap: 14px;
   }
-  @media (max-width: 820px) {
+  @media (max-width: 640px) {
     .logits-grid { grid-template-columns: 1fr; }
   }
-  .logit-card {
+  .logit-tile {
     background: var(--card);
-    border-radius: 10px;
-    overflow: hidden;
     border: 1px solid var(--rule);
-  }
-  .logit-card .label {
-    padding: 12px 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    border-bottom: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+    text-align: left;
+    font: inherit;
+    color: inherit;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .logit-tile:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent);
     background: var(--card-2);
   }
-  .logit-card .label .cls {
-    color: var(--accent);
-    font-weight: 600;
+  .logit-tile .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
-  .logit-card iframe {
-    width: 100%;
-    height: 480px;
-    border: 0;
-    display: block;
-    background: #fff;
+  .logit-tile .ttl {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .logit-tile .ttl .cls { color: var(--accent); }
+  .logit-tile .hint {
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
   }
 
-  /* PIPELINE GALLERY */
+  /* ===================== PIPELINE STAGES ===================== */
   .pipeline-head {
     display: flex;
     align-items: flex-end;
@@ -247,9 +430,7 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
-    transition: opacity .15s ease;
   }
-  .pipeline-stages.switching { opacity: 0.35; }
   @media (max-width: 1100px) {
     .pipeline-stages { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   }
@@ -260,75 +441,148 @@
     background: var(--card);
     border: 1px solid var(--rule);
     border-radius: 10px;
-    overflow: hidden;
+    padding: 14px 14px 12px;
+    cursor: pointer;
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+    text-align: left;
+    font: inherit;
+    color: inherit;
     display: flex;
     flex-direction: column;
+    gap: 4px;
     position: relative;
   }
-  .stage-step {
-    position: absolute;
-    top: 10px;
-    left: 12px;
+  .stage-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    background: var(--card-2);
+  }
+  .stage-card .stage-step {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
     color: var(--accent);
-    background: var(--bg);
-    padding: 2px 7px;
-    border-radius: 3px;
-    border: 1px solid var(--rule);
-    z-index: 2;
   }
-  .stage-name {
-    padding: 12px 14px 10px 50px;
+  .stage-card .stage-name {
     font-family: 'Source Serif 4', serif;
     font-weight: 600;
     font-size: 15px;
     color: var(--ink);
+  }
+  .stage-card .stage-caption {
+    font-family: 'Source Serif 4', serif;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    margin-top: 2px;
+  }
+  .stage-card .stage-open {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
+  /* ===================== MODAL ===================== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 18, 14, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+    backdrop-filter: blur(2px);
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    width: min(1100px, 100%);
+    height: min(820px, 92vh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--rule);
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
     background: var(--card-2);
     border-bottom: 1px solid var(--rule);
   }
-  .stage-frame {
-    aspect-ratio: 1 / 1;
-    background: #fff;
-    overflow: hidden;
+  .modal-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
   }
-  .stage-frame iframe {
+  .modal-title h3 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .modal-title .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .modal-close {
+    width: 36px; height: 36px;
+    border: 0;
+    background: transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 22px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, color .15s ease;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: var(--accent); color: var(--bg); }
+  .modal-body {
+    flex: 1;
+    background: #fff;
+    position: relative;
+    min-height: 0;
+  }
+  .modal-body iframe {
     width: 100%;
     height: 100%;
     border: 0;
     display: block;
   }
-  .stage-caption {
-    padding: 10px 14px 14px;
-    font-family: 'Source Serif 4', serif;
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    line-height: 1.45;
+  .modal-body .spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    pointer-events: none;
   }
-  .stage-caption i { font-style: italic; }
-
-  /* METHOD */
-  .method-figure {
-    margin: 16px 0 20px;
-    background: var(--card);
-    padding: 24px;
-    border-radius: 10px;
-    border: 1px solid var(--rule);
-  }
-  .method-figure img {
-    width: 100%;
-    display: block;
-    border-radius: 4px;
-  }
-  .method-caption {
-    font-family: 'Source Serif 4', serif;
-    font-size: 16px;
-    color: var(--ink-soft);
-    line-height: 1.55;
-    max-width: 860px;
-  }
-  .method-caption b { color: var(--ink); }
+  .modal-body.loaded .spinner { display: none; }
 
   /* BIBTEX */
   pre.bibtex {
@@ -408,18 +662,102 @@
 </div>
 
 
-<!-- ===================== METHOD ===================== -->
+<!-- ===================== METHOD (interactive figure) ===================== -->
 <section class="anchor" id="method">
-  <div class="wrap">
+  <div class="wrap-wide">
     <h2>Method</h2>
-    <p class="lede">SegWithU treats the segmentation backbone as a fixed predictor and learns a small uncertainty head on tapped intermediate features. Uncertainty is parameterised as <b>perturbation energy</b>: rank-1 probes induce latent perturbations whose effect on output logits is the basis for the epistemic signal.</p>
+    <p class="lede">SegWithU treats the segmentation backbone as a fixed predictor and learns a small uncertainty head on tapped intermediate features. Uncertainty is parameterised as <b>perturbation energy</b>: rank-1 probes induce latent perturbations whose effect on output logits is the basis for the epistemic signal. <b>Click any labeled box</b> in the figure below to open the corresponding interactive 3D rendering.</p>
 
     <div class="method-figure">
-      <img src="method_figure.png" alt="Method figure showing frozen backbone, multi-scale feature taps, fusion, delta-logits, epistemic and aleatoric outputs, and downstream calibration / anchor / ranking maps." />
+      <div class="arch-wrap" id="archWrap">
+        <img src="assets/swu-arch.png" alt="SegWithU architecture diagram. Frozen backbone, multi-scale feature taps, fusion, probe response, delta-logits, residual, epistemic and aleatoric maps, and downstream calibration, anchor, ranking, weight, margin, and entropy maps." />
+
+        <!--
+          Hotspots are positioned in % of the underlying image (3508 x 2481).
+          Each button opens the interactive Plotly visualization in a modal.
+          data-src   : the html file to load
+          data-title : human-readable title
+          data-tag   : small monospace tag shown in the modal header
+        -->
+
+        <!-- Top row (labels appear below to avoid clipping at the top) -->
+        <button class="hot below" style="left:4%;  top:4.5%;  width:12.5%; height:17%;"
+                data-src="assets/input_case8.html"  data-title="Input Volume"            data-tag="case 8 · stage 01"
+                data-label="Input Volume"></button>
+
+        <button class="hot below" style="left:65%;   top:3.5%;  width:18%;   height:18%;"
+                data-src="assets/logits_0.html"     data-title="Logits — Class 0"       data-tag="background"
+                data-label="Logits"></button>
+
+        <button class="hot below" style="left:86%;   top:4%;  width:12.5%; height:17%;"
+                data-src="assets/pred_seg_case8.html" data-title="Probabilities (Predicted Segmentation)" data-tag="argmax(softmax(z))"
+                data-label="Probabilities"></button>
+
+        <!-- Multi-scale feature maps stack (left side) -->
+        <button class="hot" style="left:1.5%;  top:33%;   width:18%;   height:38%;"
+                data-src="assets/feature_map_0_0.html" data-title="Multi-scale Feature Maps" data-tag="tapped backbone features"
+                data-label="Feature Maps"></button>
+
+        <!-- Probe Response cube + Probe Map -->
+        <!-- <button class="hot" style="left:36%;   top:33%;   width:13.5%; height:14%;"
+                data-src="assets/probe_response_0.html" data-title="Probe Response" data-tag="rank-1 posterior probes"
+                data-label="Probe Response"></button> -->
+
+        <button class="hot" style="left:52%;   top:23%;   width:12%;   height:17%;"
+                data-src="assets/probe_response_0.html" data-title="Probe Map" data-tag="ψ(h)"
+                data-label="Probe Map"></button>
+
+        <!-- Entropy Map (right) -->
+        <button class="hot" style="left:86%;   top:29%;   width:12.5%; height:17%;"
+                data-src="assets/entropy_map.html" data-title="Entropy Map" data-tag="H(p) = −Σ p_c log p_c"
+                data-label="Entropy"></button>
+
+        <!-- Residual Map (center) -->
+        <button class="hot below" style="left:52%;   top:42%;   width:12%;   height:17%;"
+                data-src="assets/residual_case8.html" data-title="Residual Map" data-tag="δz from probes"
+                data-label="Residual"></button>
+
+        <!-- Margin Map -->
+        <button class="hot below" style="left:65%;   top:64%;   width:14.5%; height:14%;"
+                data-src="assets/margin_case8.html" data-title="Margin Map" data-tag="z₍₁₎ − z₍₂₎"
+                data-label="Margin"></button>
+
+        <!-- Weight Map -->
+        <button class="hot below" style="left:86%;   top:58.5%;   width:12.5%; height:17%;"
+                data-src="assets/weight_case8.html" data-title="Weight Map" data-tag="ambiguity weight"
+                data-label="Weight"></button>
+
+        <!-- Epistemic (lower-left of center) -->
+        <button class="hot below" style="left:35%;   top:59%;   width:12.5%; height:16%;"
+                data-src="assets/epistemic_case8.html" data-title="Epistemic Uncertainty" data-tag="Var(δz)"
+                data-label="Epistemic"></button>
+
+        <!-- Bottom row: Aleatoric, Calibration, Anchor, Ranking -->
+        <button class="hot below" style="left:41%;   top:81%;   width:12%; height:17%;"
+                data-src="assets/aleatoric_case8.html" data-title="Aleatoric Uncertainty" data-tag="data-intrinsic noise"
+                data-label="Aleatoric"></button>
+
+        <button class="hot below" style="left:55%;   top:81%;   width:12%; height:17%;"
+                data-src="assets/calibration_case8.html" data-title="Calibration Map" data-tag="z̃ = z / √(1+U_cal)"
+                data-label="Calibration"></button>
+
+        <button class="hot below" style="left:68.5%; top:81%;   width:12.5%; height:17%;"
+                data-src="assets/anchor_case8.html" data-title="Anchor Map" data-tag="error-anchor signal"
+                data-label="Anchor"></button>
+
+        <button class="hot below" style="left:86%;   top:81%;   width:12.5%; height:17%;"
+                data-src="assets/ranking_case8.html" data-title="Ranking Map" data-tag="error ordering / selective prediction"
+                data-label="Ranking"></button>
+      </div>
+
+      <div class="arch-legend">
+        <span><span class="swatch"></span>each dashed box is clickable — opens the interactive 3D map</span>
+      </div>
+
+      <p class="method-caption">
+        <b>Overview of SegWithU.</b> A <i>frozen</i> segmentation backbone produces logits and a probability map. Multi-scale intermediate features are tapped (purple) and fused into a probe response that yields a <b>probe map</b>. Rank-1 posterior probes induce class-logit perturbations (the <b>residual map</b>), whose variance gives the <b>epistemic</b> map. In parallel, an <b>aleatoric</b> branch reads the fused features. Auxiliary signals — entropy, margin, ambiguity weight — combine with these via lightweight 1×1 convolutions to produce two functionally distinct outputs: a <b>calibration</b> map that tempers logits via <i>z̃ = z / √(1+U<sub>cal</sub>)</i>, and an <b>anchor → ranking</b> map optimized for error ordering and selective prediction. Only the orange modules are learnable; the backbone is never modified.
+      </p>
     </div>
-    <p class="method-caption">
-      <b>Overview of SegWithU.</b> A <i>frozen</i> segmentation backbone produces logits and a probability map. Multi-scale intermediate features are tapped (purple) and fused into a probe response that yields a <b>probe map</b>. Rank-1 posterior probes induce class-logit perturbations (the <b>residual map</b>), whose variance gives the <b>epistemic</b> map. In parallel, an <b>aleatoric</b> branch reads the fused features. Auxiliary signals — entropy, margin, ambiguity weight — combine with these via lightweight 1×1 convolutions to produce two functionally distinct outputs: a <b>calibration</b> map that tempers logits via <i>z̃ = z / √(1+U<sub>cal</sub>)</i>, and an <b>anchor → ranking</b> map optimized for error ordering and selective prediction. Only the orange modules are learnable; the backbone is never modified.
-    </p>
   </div>
 </section>
 
@@ -429,14 +767,22 @@
     <h2>Interactive Viewer</h2>
     <p class="lede">Per-class logit volumes produced by the frozen segmentation backbone, rendered as fully interactive Plotly volumes. Click and drag to orbit, scroll to zoom, and hover to read raw logit values.</p>
     <div class="logits-grid">
-      <div class="logit-card">
-        <div class="label"><span>Class 0 — <span class="cls">Background</span></span><span>logit volume</span></div>
-        <iframe src="assets/logits_0.html" loading="lazy" title="Class 0 logits"></iframe>
-      </div>
-      <div class="logit-card">
-        <div class="label"><span>Class 1 — <span class="cls">Foreground</span></span><span>logit volume</span></div>
-        <iframe src="assets/logits_1.html" loading="lazy" title="Class 1 logits"></iframe>
-      </div>
+      <button class="logit-tile open-modal"
+              data-src="assets/logits_0.html"
+              data-title="Logits — Class 0 (Background)"
+              data-tag="logit volume">
+        <span class="lbl">Class 0</span>
+        <span class="ttl"><span class="cls">Background</span> logit volume</span>
+        <span class="hint">Open interactive view ↗</span>
+      </button>
+      <button class="logit-tile open-modal"
+              data-src="assets/logits_1.html"
+              data-title="Logits — Class 1 (Foreground)"
+              data-tag="logit volume">
+        <span class="lbl">Class 1</span>
+        <span class="ttl"><span class="cls">Foreground</span> logit volume</span>
+        <span class="hint">Open interactive view ↗</span>
+      </button>
     </div>
   </div>
 </section>
@@ -447,7 +793,7 @@
     <div class="pipeline-head">
       <div>
         <h2>Pipeline</h2>
-        <p class="lede">A walk through the five stages of SegWithU on a single case — from input volume through tapped features, probe responses, logits, and the resulting entropy map. Use the arrows to flip between two examples.</p>
+        <p class="lede">A walk through the five stages of SegWithU on a single case — from input volume through tapped features, probe responses, logits, and the resulting entropy map. Use the arrows to flip between two examples; click any stage to open it.</p>
       </div>
       <div class="pager" role="group" aria-label="Example pager">
         <button class="pager-btn" id="prevEx" aria-label="Previous example">◀</button>
@@ -457,41 +803,105 @@
     </div>
 
     <div class="pipeline-stages" id="pipelineStages">
-      <div class="stage-card">
-        <div class="stage-step">01</div>
-        <div class="stage-name">Input Volume</div>
-        <div class="stage-frame"><iframe src="assets/input_png.html" loading="lazy" title="Input volume"></iframe></div>
-        <div class="stage-caption">Raw 3D input fed to the frozen backbone.</div>
-      </div>
+      <button class="stage-card open-modal" id="stInput"
+              data-src="assets/input_case8.html"
+              data-title="Input Volume"
+              data-tag="case 8 · stage 01">
+        <span class="stage-step">01</span>
+        <span class="stage-name">Input Volume</span>
+        <span class="stage-caption">Raw 3D input fed to the frozen backbone.</span>
+        <span class="stage-open">Open ↗</span>
+      </button>
 
-      <div class="stage-card">
-        <div class="stage-step">02</div>
-        <div class="stage-name">Feature Map</div>
-        <div class="stage-frame"><iframe id="frFeature" src="assets/feature_map_0_0.html" loading="lazy" title="Feature map"></iframe></div>
-        <div class="stage-caption">Tapped multi-scale feature representation.</div>
-      </div>
+      <button class="stage-card open-modal" id="stFeature"
+              data-src="assets/feature_map_0_0.html"
+              data-title="Feature Map"
+              data-tag="tapped multi-scale">
+        <span class="stage-step">02</span>
+        <span class="stage-name">Feature Map</span>
+        <span class="stage-caption">Tapped multi-scale feature representation.</span>
+        <span class="stage-open">Open ↗</span>
+      </button>
 
-      <div class="stage-card">
-        <div class="stage-step">03</div>
-        <div class="stage-name">Probe Response</div>
-        <div class="stage-frame"><iframe id="frProbe" src="assets/probe_response_0.html" loading="lazy" title="Probe response"></iframe></div>
-        <div class="stage-caption">Rank-1 posterior probe activations <i>v = ψ(h)</i>.</div>
-      </div>
+      <button class="stage-card open-modal" id="stProbe"
+              data-src="assets/probe_response_0.html"
+              data-title="Probe Response"
+              data-tag="ψ(h)">
+        <span class="stage-step">03</span>
+        <span class="stage-name">Probe Response</span>
+        <span class="stage-caption">Rank-1 posterior probe activations <i>v = ψ(h)</i>.</span>
+        <span class="stage-open">Open ↗</span>
+      </button>
 
-      <!-- <div class="stage-card">
-        <div class="stage-step">04</div>
-        <div class="stage-name">Logits</div>
-        <div class="stage-frame"><iframe id="frLogit" src="assets/logits_0.html" loading="lazy" title="Logits"></iframe></div>
-        <div class="stage-caption">Per-class backbone logits before softmax.</div>
-      </div> -->
+      <button class="stage-card open-modal" id="stLogit"
+              data-src="assets/logits_0.html"
+              data-title="Logits"
+              data-tag="per-class">
+        <span class="stage-step">04</span>
+        <span class="stage-name">Logits</span>
+        <span class="stage-caption">Per-class backbone logits before softmax.</span>
+        <span class="stage-open">Open ↗</span>
+      </button>
 
-      <!-- <div class="stage-card">
-        <div class="stage-step">05</div> -->
-        <!-- <div class="stage-name">Entropy</div>
-        <div class="stage-frame"><iframe src="assets/entropy_map.html" loading="lazy" title="Entropy map"></iframe></div> -->
-        <!-- <div class="stage-caption">Shannon entropy <i>H(p) = −Σ p<sub>c</sub> log p<sub>c</sub></i>.</div> -->
-      <!-- </div>
-    <!-- </div> --> -->
+      <button class="stage-card open-modal"
+              data-src="assets/entropy_map.html"
+              data-title="Entropy Map"
+              data-tag="H(p)">
+        <span class="stage-step">05</span>
+        <span class="stage-name">Entropy</span>
+        <span class="stage-caption">Shannon entropy <i>H(p) = −Σ p<sub>c</sub> log p<sub>c</sub></i>.</span>
+        <span class="stage-open">Open ↗</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ALL MAPS (case-8 grid) ===================== -->
+<section class="anchor" id="maps">
+  <div class="wrap">
+    <h2>All Maps</h2>
+    <p class="lede">Every uncertainty map produced for case 8, in one place. Click a tile to open its interactive 3D view. The same maps are accessible directly from the architecture diagram above.</p>
+
+    <div class="map-grid">
+      <button class="map-tile open-modal" data-src="assets/input_case8.html"       data-title="Input Volume"             data-tag="case 8">
+        <div class="name">Input Volume</div><div class="meta">raw input <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/label_case8.html"       data-title="Ground-truth Label"       data-tag="case 8">
+        <div class="name">Label</div><div class="meta">ground truth <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/pred_seg_case8.html"    data-title="Predicted Segmentation"   data-tag="case 8">
+        <div class="name">Predicted Seg.</div><div class="meta">argmax softmax <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/entropy_map.html"       data-title="Entropy Map"              data-tag="H(p)">
+        <div class="name">Entropy</div><div class="meta">−Σ p log p <span class="arrow">↗</span></div>
+      </button>
+
+      <button class="map-tile open-modal" data-src="assets/residual_case8.html"    data-title="Residual Map"             data-tag="δz">
+        <div class="name">Residual</div><div class="meta">δ-logits <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/epistemic_case8.html"   data-title="Epistemic Uncertainty"    data-tag="Var(δz)">
+        <div class="name">Epistemic</div><div class="meta">probe variance <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/aleatoric_case8.html"   data-title="Aleatoric Uncertainty"    data-tag="data noise">
+        <div class="name">Aleatoric</div><div class="meta">data-intrinsic <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/margin_case8.html"      data-title="Margin Map"               data-tag="z₍₁₎−z₍₂₎">
+        <div class="name">Margin</div><div class="meta">top-2 logit gap <span class="arrow">↗</span></div>
+      </button>
+
+      <button class="map-tile open-modal" data-src="assets/weight_case8.html"      data-title="Weight Map"               data-tag="ambiguity">
+        <div class="name">Weight</div><div class="meta">ambiguity weight <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/calibration_case8.html" data-title="Calibration Map"          data-tag="U_cal">
+        <div class="name">Calibration</div><div class="meta">temper logits <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/anchor_case8.html"      data-title="Anchor Map"               data-tag="error anchor">
+        <div class="name">Anchor</div><div class="meta">error anchor <span class="arrow">↗</span></div>
+      </button>
+      <button class="map-tile open-modal" data-src="assets/ranking_case8.html"     data-title="Ranking Map"              data-tag="error ordering">
+        <div class="name">Ranking</div><div class="meta">error ordering <span class="arrow">↗</span></div>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -510,49 +920,119 @@
   </div>
 </section>
 
+<footer>
+  <div>SegWithU · Project Neura · 2026</div>
+</footer>
+
+<!-- ===================== MODAL (single, reused) ===================== -->
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" role="document">
+    <div class="modal-head">
+      <div class="modal-title">
+        <h3 id="modalTitle">Map</h3>
+        <span class="tag" id="modalTag"></span>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="spinner">Loading interactive view…</div>
+      <iframe id="modalFrame" title="Interactive view" allow="fullscreen" loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+
 <script>
-/* Pipeline pager — toggles iframes between example 0 and example 1 */
+/* ============================================================
+ * Modal handling — every element with .open-modal OR .hot opens the
+ * shared modal and loads its data-src into the iframe.
+ * ============================================================ */
+(function() {
+  const modal     = document.getElementById('modal');
+  const modalBody = document.getElementById('modalBody');
+  const frame     = document.getElementById('modalFrame');
+  const titleEl   = document.getElementById('modalTitle');
+  const tagEl     = document.getElementById('modalTag');
+  const closeBtn  = document.getElementById('modalClose');
+
+  let lastFocus = null;
+
+  function openModal(src, title, tag, originEl) {
+    titleEl.textContent = title || 'Interactive view';
+    tagEl.textContent = tag || '';
+    modalBody.classList.remove('loaded');
+    // Set src last so spinner is visible while loading
+    frame.src = src;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    lastFocus = originEl || document.activeElement;
+    setTimeout(() => closeBtn.focus(), 0);
+  }
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    // Free up resources
+    frame.src = 'about:blank';
+    if (lastFocus && typeof lastFocus.focus === 'function') {
+      lastFocus.focus();
+    }
+  }
+
+  frame.addEventListener('load', () => {
+    if (frame.src && frame.src !== 'about:blank' && !frame.src.endsWith('about:blank')) {
+      modalBody.classList.add('loaded');
+    }
+  });
+
+  // Wire every trigger
+  document.querySelectorAll('.open-modal, .hot').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const src   = el.getAttribute('data-src');
+      const title = el.getAttribute('data-title');
+      const tag   = el.getAttribute('data-tag');
+      if (!src) return;
+      openModal(src, title, tag, el);
+    });
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+})();
+
+/* ============================================================
+ * Pipeline pager — switches the data-src on the three example-
+ * dependent stage cards so opening them shows the right example.
+ * ============================================================ */
 (function() {
   const examples = [
-    {
-      feature: 'assets/feature_map_0_0.html',
-      probe:   'assets/probe_response_0.html',
-      logit:   'assets/logits_0.html',
-    },
-    {
-      feature: 'assets/feature_map_0_1.html',
-      probe:   'assets/probe_response_1.html',
-      logit:   'assets/logits_1.html',
-    },
+    { feature: 'assets/feature_map_0_0.html', probe: 'assets/probe_response_0.html', logit: 'assets/logits_0.html' },
+    { feature: 'assets/feature_map_0_1.html', probe: 'assets/probe_response_1.html', logit: 'assets/logits_1.html' },
   ];
   let idx = 0;
-  const fr = {
-    feature: document.getElementById('frFeature'),
-    probe:   document.getElementById('frProbe'),
-    logit:   document.getElementById('frLogit'),
+  const cards = {
+    feature: document.getElementById('stFeature'),
+    probe:   document.getElementById('stProbe'),
+    logit:   document.getElementById('stLogit'),
   };
   const lbl = document.getElementById('exLabel');
-  const stages = document.getElementById('pipelineStages');
 
   function go(newIdx) {
-    if (newIdx === idx) return;
     idx = (newIdx + examples.length) % examples.length;
     const e = examples[idx];
-    // brief fade for feel
-    stages.classList.add('switching');
-    setTimeout(() => {
-      fr.feature.src = e.feature;
-      fr.probe.src   = e.probe;
-      fr.logit.src   = e.logit;
-      lbl.textContent = `Example ${idx + 1} of ${examples.length}`;
-      stages.classList.remove('switching');
-    }, 160);
+    cards.feature.setAttribute('data-src', e.feature);
+    cards.probe.setAttribute('data-src',   e.probe);
+    cards.logit.setAttribute('data-src',   e.logit);
+    lbl.textContent = `Example ${idx + 1} of ${examples.length}`;
   }
   document.getElementById('prevEx').addEventListener('click', () => go(idx - 1));
   document.getElementById('nextEx').addEventListener('click', () => go(idx + 1));
 })();
 </script>
-
 
 </body>
 </html>
