@@ -35,6 +35,7 @@
   a:hover { text-decoration: underline; }
 
   .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .wrap-wide { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
 
   /* HERO */
   header.hero {
@@ -159,176 +160,320 @@
   }
   .tldr b { font-style: normal; color: var(--accent); font-weight: 600; }
 
-  /* LOGITS (interactive viewer — Plotly iframes) */
-  .logits-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
-  }
-  @media (max-width: 820px) {
-    .logits-grid { grid-template-columns: 1fr; }
-  }
-  .logit-card {
-    background: var(--card);
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid var(--rule);
-  }
-  .logit-card .label {
-    padding: 12px 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    border-bottom: 1px solid var(--rule);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--card-2);
-  }
-  .logit-card .label .cls {
-    color: var(--accent);
-    font-weight: 600;
-  }
-  .logit-card iframe {
-    width: 100%;
-    height: 480px;
-    border: 0;
-    display: block;
-    background: #fff;
-  }
-
-  /* PIPELINE GALLERY */
-  .pipeline-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 18px;
-  }
-  @media (max-width: 720px) {
-    .pipeline-head { flex-direction: column; align-items: stretch; }
-  }
-  .pager {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--card);
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    padding: 4px;
-    flex-shrink: 0;
-  }
-  .pager-btn {
-    width: 36px; height: 36px;
-    border: 0;
-    background: transparent;
-    border-radius: 999px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--ink);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s ease, color .15s ease;
-  }
-  .pager-btn:hover { background: var(--accent); color: var(--bg); }
-  .pager-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    color: var(--ink-soft);
-    padding: 0 12px;
-    user-select: none;
-  }
-
-  .pipeline-stages {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    transition: opacity .15s ease;
-  }
-  .pipeline-stages.switching { opacity: 0.35; }
-  @media (max-width: 1100px) {
-    .pipeline-stages { grid-template-columns: repeat(2, 1fr); gap: 14px; }
-  }
-  @media (max-width: 540px) {
-    .pipeline-stages { grid-template-columns: 1fr; }
-  }
-  .stage-card {
-    background: var(--card);
-    border: 1px solid var(--rule);
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  .stage-step {
-    position: absolute;
-    top: 10px;
-    left: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-    background: var(--bg);
-    padding: 2px 7px;
-    border-radius: 3px;
-    border: 1px solid var(--rule);
-    z-index: 2;
-  }
-  .stage-name {
-    padding: 12px 14px 10px 50px;
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    font-size: 15px;
-    color: var(--ink);
-    background: var(--card-2);
-    border-bottom: 1px solid var(--rule);
-  }
-  .stage-frame {
-    aspect-ratio: 1 / 1;
-    background: #fff;
-    overflow: hidden;
-  }
-  .stage-frame iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-  }
-  .stage-caption {
-    padding: 10px 14px 14px;
-    font-family: 'Source Serif 4', serif;
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    line-height: 1.45;
-  }
-  .stage-caption i { font-style: italic; }
-
-  /* METHOD */
+  /* ===================== INTERACTIVE METHOD FIGURE ===================== */
   .method-figure {
     margin: 16px 0 20px;
     background: var(--card);
-    padding: 24px;
+    padding: 22px;
     border-radius: 10px;
     border: 1px solid var(--rule);
   }
-  .method-figure img {
+  /* Reserve the figure's intrinsic aspect ratio so layout never collapses,
+     even if the PNG fails to load (you'll see a placeholder rather than a strip). */
+  .arch-wrap {
+    position: relative;
     width: 100%;
-    display: block;
-    border-radius: 4px;
+    aspect-ratio: 3508 / 2481;     /* swu-arch.png native ratio */
+    line-height: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
   }
+  .arch-wrap img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+  /* Visible placeholder if the image fails to load */
+  .arch-wrap::before {
+    content: "swu-arch.png — figure not found at this path";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    padding: 0 24px;
+    z-index: 0;
+  }
+  .arch-wrap img { z-index: 1; }
+  /* hotspots are absolutely-positioned in % over the image */
+  .hot {
+    position: absolute;
+    border: 1.5px dashed rgba(194, 65, 12, 0.35);
+    background: rgba(194, 65, 12, 0.04);
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 0;
+    transition: background .15s ease, box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+    z-index: 2;
+  }
+  .hot:hover, .hot:focus-visible {
+    background: rgba(194, 65, 12, 0.18);
+    border-color: var(--accent);
+    border-style: solid;
+    box-shadow: 0 0 0 4px rgba(194, 65, 12, 0.12);
+    transform: scale(1.02);
+    outline: none;
+  }
+  /* small "click to view" pulse-tag visible on hover */
+  .hot::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -26px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  .hot:hover::after, .hot:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+  }
+  .hot.below::after { top: auto; bottom: -26px; }
+  .hot.below:hover::after, .hot.below:focus-visible::after {
+    transform: translateX(-50%) translateY(2px);
+  }
+
+  .arch-legend {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+  .arch-legend .swatch {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    background: rgba(194, 65, 12, 0.04);
+    border: 1.5px dashed rgba(194, 65, 12, 0.55);
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
   .method-caption {
     font-family: 'Source Serif 4', serif;
     font-size: 16px;
     color: var(--ink-soft);
     line-height: 1.55;
     max-width: 860px;
+    margin-top: 16px;
   }
   .method-caption b { color: var(--ink); }
+
+  /* ===================== INLINE GALLERY (case-8 maps grid) ===================== */
+  .map-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 22px;
+  }
+  @media (max-width: 900px) {
+    .map-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .map-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .map-tile {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 14px 12px;
+    cursor: pointer;
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    width: 100%;
+  }
+  .map-tile:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    background: var(--card-2);
+  }
+  .map-tile .name {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ink);
+    margin: 0 0 2px;
+  }
+  .map-tile .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .map-tile .meta .arrow {
+    color: var(--accent);
+    margin-left: 4px;
+  }
+
+  /* ===================== MODAL ===================== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 18, 14, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+    backdrop-filter: blur(2px);
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    width: min(1100px, 100%);
+    height: min(820px, 92vh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--rule);
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--card-2);
+    border-bottom: 1px solid var(--rule);
+  }
+  .modal-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+  }
+  .modal-title h3 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .modal-title .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .modal-close {
+    width: 36px; height: 36px;
+    border: 0;
+    background: transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 22px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, color .15s ease;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: var(--accent); color: var(--bg); }
+
+  /* In-modal series navigation (prev / counter / next) */
+  .modal-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+  .modal-nav[hidden] { display: none; }
+  .modal-arrow {
+    width: 30px; height: 30px;
+    border: 0;
+    background: transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--ink);
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, color .15s ease;
+  }
+  .modal-arrow:hover:not(:disabled) { background: var(--accent); color: var(--bg); }
+  .modal-arrow:disabled {
+    color: var(--muted);
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .modal-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    padding: 0 10px;
+    user-select: none;
+    min-width: 44px;
+    text-align: center;
+  }
+  .modal-body {
+    flex: 1;
+    background: #fff;
+    position: relative;
+    min-height: 0;
+  }
+  .modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .modal-body .spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .modal-body.loaded .spinner { display: none; }
 
   /* BIBTEX */
   pre.bibtex {
@@ -404,94 +549,106 @@
 </header>
 
 <div class="tldr">
-  <b>TL;DR.</b> SegWithU wraps a <i>frozen</i> pretrained segmentation backbone with a lightweight uncertainty head. It models uncertainty as <b>perturbation energy</b> in a compact probe space using rank-1 posterior probes, yielding two voxel-wise maps — a <i>calibration</i> map for probability tempering and a <i>ranking</i> map for error detection — in a single forward pass.
+  <b>TL;DR.</b> SegWithU wraps a <i>frozen</i> pretrained segmentation backbone with a lightweight uncertainty head. It models uncertainty as <b>perturbation energy</b> in a compact probe space using rank-1 posterior probes, yielding two voxel-wise maps, a <i>calibration</i> map for probability tempering and a <i>ranking</i> map for error detection, in a single forward pass.
 </div>
 
 
-<!-- ===================== METHOD ===================== -->
+<!-- ===================== METHOD (interactive figure) ===================== -->
 <section class="anchor" id="method">
-  <div class="wrap">
+  <div class="wrap-wide">
     <h2>Method</h2>
-    <p class="lede">SegWithU treats the segmentation backbone as a fixed predictor and learns a small uncertainty head on tapped intermediate features. Uncertainty is parameterised as <b>perturbation energy</b>: rank-1 probes induce latent perturbations whose effect on output logits is the basis for the epistemic signal.</p>
+    <p class="lede">SegWithU treats the segmentation backbone as a fixed predictor and learns a small uncertainty head on tapped intermediate features. Uncertainty is parameterised as <b>perturbation energy</b>: rank-1 probes induce latent perturbations whose effect on output logits is the basis for the epistemic signal. <b>Click any labeled box</b> in the figure below to open the corresponding interactive 3D rendering.</p>
 
     <div class="method-figure">
-      <img src="method_figure.png" alt="Method figure showing frozen backbone, multi-scale feature taps, fusion, delta-logits, epistemic and aleatoric outputs, and downstream calibration / anchor / ranking maps." />
+      <div class="arch-wrap" id="archWrap">
+        <img src="assets/swu-arch.png" alt="SegWithU architecture diagram. Frozen backbone, multi-scale feature taps, fusion, probe response, delta-logits, residual, epistemic and aleatoric maps, and downstream calibration, anchor, ranking, weight, margin, and entropy maps." />
+
+        <!--
+          Hotspots are positioned in % of the underlying image (3508 x 2481).
+          Each button opens the interactive Plotly visualization in a modal.
+          data-src   : the html file to load
+          data-title : human-readable title
+          data-tag   : small monospace tag shown in the modal header
+        -->
+
+        <!-- Top row (labels appear below to avoid clipping at the top) -->
+        <button class="hot below" style="left:4.1%;  top:4.3%;  width:12.5%; height:16.6%;"
+                data-src="assets/input_case8.html"  data-title="Input Volume"            data-tag="case 8 · stage 01"
+                data-label="Input Volume"></button>
+
+        <button class="hot below" style="left:68.5%;   top:3.5%;  width:12.5%;   height:18%;"
+                data-series="logits" data-index="0"
+                data-label="Logits"></button>
+
+        <button class="hot below" style="left:86%;   top:4.1%;  width:12.5%; height:17%;"
+                data-src="assets/pred_seg_case8.html" data-title="Probabilities (Predicted Segmentation)" data-tag="argmax(softmax(z))"
+                data-label="Probabilities"></button>
+
+        <!-- Multi-scale feature maps stack (left side) -->
+        <button class="hot" style="left:3.1%;  top:29%;   width:14.6%;   height:42%;"
+                data-series="feature_map_0" data-index="0"
+                data-label="Feature Maps"></button>
+
+        <!-- Probe Response cube + Probe Map -->
+        <!-- <button class="hot" style="left:36%;   top:33%;   width:13.5%; height:14%;"
+                data-src="assets/probe_response_0.html" data-title="Probe Response" data-tag="rank-1 posterior probes"
+                data-label="Probe Response"></button> -->
+
+        <button class="hot" style="left:51.7%;   top:23.5%;   width:12.5%;   height:16.8%;"
+                data-series="probe_response" data-index="0"
+                data-label="Probe Map"></button>
+
+        <!-- Entropy Map (right) -->
+        <button class="hot" style="left:86%;   top:28.9%;   width:12.5%; height:16.9%;"
+                data-src="assets/entropy_map.html" data-title="Entropy Map" data-tag="H(p) = −Σ p_c log p_c"
+                data-label="Entropy"></button>
+
+        <!-- Residual Map (center) -->
+        <button class="hot below" style="left:51.8%;   top:41.8%;   width:12.2%;   height:17%;"
+                data-src="assets/residual_case8.html" data-title="Residual Map" data-tag="δz from probes"
+                data-label="Residual"></button>
+
+        <!-- Margin Map -->
+        <button class="hot below" style="left:68.5%;   top:58.5%;   width:12.5%; height:16.9%;"
+                data-src="assets/margin_case8.html" data-title="Margin Map" data-tag="z₍₁₎ − z₍₂₎"
+                data-label="Margin"></button>
+
+        <!-- Weight Map -->
+        <button class="hot below" style="left:86%;   top:58.5%;   width:12.5%; height:16.9%;"
+                data-src="assets/weight_case8.html" data-title="Weight Map" data-tag="ambiguity weight"
+                data-label="Weight"></button>
+
+        <!-- Epistemic (lower-left of center) -->
+        <button class="hot below" style="left:34.9%;   top:58.5%;   width:12.5%; height:16.8%;"
+                data-src="assets/epistemic_case8.html" data-title="Epistemic Uncertainty" data-tag="Var(δz)"
+                data-label="Epistemic"></button>
+
+        <!-- Bottom row: Aleatoric, Calibration, Anchor, Ranking -->
+        <button class="hot below" style="left:40.6%;   top:81.2%;   width:12.5%; height:16.8%;"
+                data-src="assets/aleatoric_case8.html" data-title="Aleatoric Uncertainty" data-tag="data-intrinsic noise"
+                data-label="Aleatoric"></button>
+
+        <button class="hot below" style="left:54.6%;   top:81.2%;   width:12.5%; height:16.8%;"
+                data-src="assets/calibration_case8.html" data-title="Calibration Map" data-tag="z̃ = z / √(1+U_cal)"
+                data-label="Calibration"></button>
+
+        <button class="hot below" style="left:68.55%; top:81.2%;   width:12.5%; height:16.8%;"
+                data-src="assets/anchor_case8.html" data-title="Anchor Map" data-tag="error-anchor signal"
+                data-label="Anchor"></button>
+
+        <button class="hot below" style="left:86.05%;   top:81.2%;   width:12.5%; height:16.8%;"
+                data-src="assets/ranking_case8.html" data-title="Ranking Map" data-tag="error ordering / selective prediction"
+                data-label="Ranking"></button>
+      </div>
+
+      <div class="arch-legend">
+        <span><span class="swatch"></span>each dashed box is clickable — opens the interactive 3D map</span>
+      </div>
+
+      <p class="method-caption">
+        <b>Overview of SegWithU.</b> A <i>frozen</i> segmentation backbone produces logits and a probability map. Multi-scale intermediate features are tapped (purple) and fused into a probe response that yields a <b>probe map</b>. Rank-1 posterior probes induce class-logit perturbations (the <b>residual map</b>), whose variance gives the <b>epistemic</b> map. In parallel, an <b>aleatoric</b> branch reads the fused features. Auxiliary signals — entropy, margin, ambiguity weight — combine with these via lightweight 1×1 convolutions to produce two functionally distinct outputs: a <b>calibration</b> map that tempers logits via <i>z̃ = z / √(1+U<sub>cal</sub>)</i>, and an <b>anchor → ranking</b> map optimized for error ordering and selective prediction. Only the orange modules are learnable; the backbone is never modified.
+      </p>
     </div>
-    <p class="method-caption">
-      <b>Overview of SegWithU.</b> A <i>frozen</i> segmentation backbone produces logits and a probability map. Multi-scale intermediate features are tapped (purple) and fused into a probe response that yields a <b>probe map</b>. Rank-1 posterior probes induce class-logit perturbations (the <b>residual map</b>), whose variance gives the <b>epistemic</b> map. In parallel, an <b>aleatoric</b> branch reads the fused features. Auxiliary signals — entropy, margin, ambiguity weight — combine with these via lightweight 1×1 convolutions to produce two functionally distinct outputs: a <b>calibration</b> map that tempers logits via <i>z̃ = z / √(1+U<sub>cal</sub>)</i>, and an <b>anchor → ranking</b> map optimized for error ordering and selective prediction. Only the orange modules are learnable; the backbone is never modified.
-    </p>
-  </div>
-</section>
-
-<!-- ===================== INTERACTIVE VIEWER ===================== -->
-<section class="anchor" id="logits">
-  <div class="wrap">
-    <h2>Interactive Viewer</h2>
-    <p class="lede">Per-class logit volumes produced by the frozen segmentation backbone, rendered as fully interactive Plotly volumes. Click and drag to orbit, scroll to zoom, and hover to read raw logit values.</p>
-    <div class="logits-grid">
-      <div class="logit-card">
-        <div class="label"><span>Class 0 — <span class="cls">Background</span></span><span>logit volume</span></div>
-        <iframe src="assets/logits_0.html" loading="lazy" title="Class 0 logits"></iframe>
-      </div>
-      <div class="logit-card">
-        <div class="label"><span>Class 1 — <span class="cls">Foreground</span></span><span>logit volume</span></div>
-        <iframe src="assets/logits_1.html" loading="lazy" title="Class 1 logits"></iframe>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== PIPELINE GALLERY ===================== -->
-<section class="anchor" id="gallery">
-  <div class="wrap">
-    <div class="pipeline-head">
-      <div>
-        <h2>Pipeline</h2>
-        <p class="lede">A walk through the five stages of SegWithU on a single case — from input volume through tapped features, probe responses, logits, and the resulting entropy map. Use the arrows to flip between two examples.</p>
-      </div>
-      <div class="pager" role="group" aria-label="Example pager">
-        <button class="pager-btn" id="prevEx" aria-label="Previous example">◀</button>
-        <span class="pager-label" id="exLabel">Example 1 of 2</span>
-        <button class="pager-btn" id="nextEx" aria-label="Next example">▶</button>
-      </div>
-    </div>
-
-    <div class="pipeline-stages" id="pipelineStages">
-      <div class="stage-card">
-        <div class="stage-step">01</div>
-        <div class="stage-name">Input Volume</div>
-        <div class="stage-frame"><iframe src="assets/input_png.html" loading="lazy" title="Input volume"></iframe></div>
-        <div class="stage-caption">Raw 3D input fed to the frozen backbone.</div>
-      </div>
-
-      <div class="stage-card">
-        <div class="stage-step">02</div>
-        <div class="stage-name">Feature Map</div>
-        <div class="stage-frame"><iframe id="frFeature" src="assets/feature_map_0_0.html" loading="lazy" title="Feature map"></iframe></div>
-        <div class="stage-caption">Tapped multi-scale feature representation.</div>
-      </div>
-
-      <div class="stage-card">
-        <div class="stage-step">03</div>
-        <div class="stage-name">Probe Response</div>
-        <div class="stage-frame"><iframe id="frProbe" src="assets/probe_response_0.html" loading="lazy" title="Probe response"></iframe></div>
-        <div class="stage-caption">Rank-1 posterior probe activations <i>v = ψ(h)</i>.</div>
-      </div>
-
-      <!-- <div class="stage-card">
-        <div class="stage-step">04</div>
-        <div class="stage-name">Logits</div>
-        <div class="stage-frame"><iframe id="frLogit" src="assets/logits_0.html" loading="lazy" title="Logits"></iframe></div>
-        <div class="stage-caption">Per-class backbone logits before softmax.</div>
-      </div> -->
-
-      <!-- <div class="stage-card">
-        <div class="stage-step">05</div> -->
-        <!-- <div class="stage-name">Entropy</div>
-        <div class="stage-frame"><iframe src="assets/entropy_map.html" loading="lazy" title="Entropy map"></iframe></div> -->
-        <!-- <div class="stage-caption">Shannon entropy <i>H(p) = −Σ p<sub>c</sub> log p<sub>c</sub></i>.</div> -->
-      <!-- </div>
-    <!-- </div> --> -->
   </div>
 </section>
 
@@ -510,49 +667,212 @@
   </div>
 </section>
 
+<footer>
+  <div>SegWithU · Project Neura · 2026</div>
+</footer>
+
+<!-- ===================== MODAL (single, reused) ===================== -->
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" role="document">
+    <div class="modal-head">
+      <div class="modal-title">
+        <h3 id="modalTitle">Map</h3>
+        <span class="tag" id="modalTag"></span>
+      </div>
+      <div class="modal-nav" id="modalNav" hidden>
+        <button class="modal-arrow" id="modalPrev" aria-label="Previous in series" title="Previous (←)">◀</button>
+        <span class="modal-counter" id="modalCounter">1 / 1</span>
+        <button class="modal-arrow" id="modalNext" aria-label="Next in series" title="Next (→)">▶</button>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Close (Esc)" title="Close (Esc)">×</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="spinner">Loading interactive view…</div>
+      <iframe id="modalFrame" title="Interactive view" allow="fullscreen" loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+
 <script>
-/* Pipeline pager — toggles iframes between example 0 and example 1 */
+/* ============================================================
+ * Modal handling — every element with .open-modal OR .hot opens the
+ * shared modal and loads its data-src into the iframe.
+ *
+ * Series support: a trigger may declare `data-series` (e.g., "logits",
+ * "feature_map_0", "probe_response"). If declared, the modal shows
+ * prev/next arrows that cycle through SERIES[name].items.
+ * ============================================================ */
 (function() {
-  const examples = [
-    {
-      feature: 'assets/feature_map_0_0.html',
-      probe:   'assets/probe_response_0.html',
-      logit:   'assets/logits_0.html',
+  const modal      = document.getElementById('modal');
+  const modalBody  = document.getElementById('modalBody');
+  const frame      = document.getElementById('modalFrame');
+  const titleEl    = document.getElementById('modalTitle');
+  const tagEl      = document.getElementById('modalTag');
+  const closeBtn   = document.getElementById('modalClose');
+  const navWrap    = document.getElementById('modalNav');
+  const prevBtn    = document.getElementById('modalPrev');
+  const nextBtn    = document.getElementById('modalNext');
+  const counterEl  = document.getElementById('modalCounter');
+
+  // Series definitions. Each item provides the file, an optional title
+  // override, and an optional tag override. The label below the counter
+  // (e.g. "Class 0") is `subtag` and it appends to the data-tag.
+  const SERIES = {
+    feature_map_0: {
+      label: 'Feature Map',
+      items: [
+        { src: 'assets/feature_map_0_0.html', title: 'Feature Map — Example 0', tag: 'tapped multi-scale · ex 0' },
+        { src: 'assets/feature_map_0_1.html', title: 'Feature Map — Example 1', tag: 'tapped multi-scale · ex 1' },
+      ],
     },
-    {
-      feature: 'assets/feature_map_0_1.html',
-      probe:   'assets/probe_response_1.html',
-      logit:   'assets/logits_1.html',
+    logits: {
+      label: 'Logits',
+      items: [
+        { src: 'assets/logits_0.html', title: 'Logits — Class 0', tag: 'background' },
+        { src: 'assets/logits_1.html', title: 'Logits — Class 1', tag: 'class 1' },
+        { src: 'assets/logits_2.html', title: 'Logits — Class 2', tag: 'class 2' },
+      ],
     },
-  ];
+    probe_response: {
+      label: 'Probe Response',
+      items: [
+        { src: 'assets/probe_response_0.html', title: 'Probe Response — Example 0', tag: 'rank-1 probes · ex 0' },
+        { src: 'assets/probe_response_1.html', title: 'Probe Response — Example 1', tag: 'rank-1 probes · ex 1' },
+      ],
+    },
+  };
+
+  let lastFocus    = null;
+  let activeSeries = null;     // string key into SERIES, or null
+  let activeIdx    = 0;
+
+  function loadInto(src, title, tag) {
+    titleEl.textContent = title || 'Interactive view';
+    tagEl.textContent   = tag || '';
+    modalBody.classList.remove('loaded');
+    frame.src = src;
+  }
+
+  function renderNav() {
+    if (!activeSeries) {
+      navWrap.hidden = true;
+      return;
+    }
+    const series = SERIES[activeSeries];
+    navWrap.hidden = false;
+    counterEl.textContent = `${activeIdx + 1} / ${series.items.length}`;
+    prevBtn.disabled = activeIdx <= 0;
+    nextBtn.disabled = activeIdx >= series.items.length - 1;
+  }
+
+  function showByIndex(seriesKey, idx) {
+    const series = SERIES[seriesKey];
+    if (!series) return;
+    activeSeries = seriesKey;
+    activeIdx = Math.max(0, Math.min(series.items.length - 1, idx));
+    const item = series.items[activeIdx];
+    loadInto(item.src, item.title, item.tag);
+    renderNav();
+  }
+
+  function openModal(originEl) {
+    const seriesKey = originEl.getAttribute('data-series');
+    if (seriesKey && SERIES[seriesKey]) {
+      // If the trigger declares which item to start on, honor it; else 0.
+      const startIdx = parseInt(originEl.getAttribute('data-index') || '0', 10);
+      showByIndex(seriesKey, startIdx);
+    } else {
+      activeSeries = null;
+      activeIdx = 0;
+      loadInto(
+        originEl.getAttribute('data-src'),
+        originEl.getAttribute('data-title'),
+        originEl.getAttribute('data-tag'),
+      );
+      renderNav();
+    }
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    lastFocus = originEl || document.activeElement;
+    setTimeout(() => closeBtn.focus(), 0);
+  }
+
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    frame.src = 'about:blank';     // free the heavy Plotly bundle
+    activeSeries = null;
+    if (lastFocus && typeof lastFocus.focus === 'function') {
+      lastFocus.focus();
+    }
+  }
+
+  function step(delta) {
+    if (!activeSeries) return;
+    const series = SERIES[activeSeries];
+    const next = activeIdx + delta;
+    if (next < 0 || next >= series.items.length) return;
+    showByIndex(activeSeries, next);
+  }
+
+  frame.addEventListener('load', () => {
+    if (frame.src && !frame.src.endsWith('about:blank')) {
+      modalBody.classList.add('loaded');
+    }
+  });
+
+  // Wire every trigger
+  document.querySelectorAll('.open-modal, .hot').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      // A trigger needs either data-src or data-series to do anything.
+      if (!el.getAttribute('data-src') && !el.getAttribute('data-series')) return;
+      openModal(el);
+    });
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  prevBtn.addEventListener('click', () => step(-1));
+  nextBtn.addEventListener('click', () => step(+1));
+  modal.addEventListener('click', e => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'Escape') { closeModal(); return; }
+    if (activeSeries) {
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); step(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); step(+1); }
+    }
+  });
+})();
+
+/* ============================================================
+ * Pipeline pager — flips the starting `data-index` on the three
+ * series-driven stage cards (feature, probe, logit). Once the modal
+ * is open, the user can still navigate further with the arrows.
+ * ============================================================ */
+(function() {
+  const N = 2;        // number of paired examples (feature_0/1, probe_0/1, logit_0/1)
   let idx = 0;
-  const fr = {
-    feature: document.getElementById('frFeature'),
-    probe:   document.getElementById('frProbe'),
-    logit:   document.getElementById('frLogit'),
+  const cards = {
+    feature: document.getElementById('stFeature'),
+    probe:   document.getElementById('stProbe'),
+    logit:   document.getElementById('stLogit'),
   };
   const lbl = document.getElementById('exLabel');
-  const stages = document.getElementById('pipelineStages');
 
   function go(newIdx) {
-    if (newIdx === idx) return;
-    idx = (newIdx + examples.length) % examples.length;
-    const e = examples[idx];
-    // brief fade for feel
-    stages.classList.add('switching');
-    setTimeout(() => {
-      fr.feature.src = e.feature;
-      fr.probe.src   = e.probe;
-      fr.logit.src   = e.logit;
-      lbl.textContent = `Example ${idx + 1} of ${examples.length}`;
-      stages.classList.remove('switching');
-    }, 160);
+    idx = (newIdx + N) % N;
+    cards.feature.setAttribute('data-index', String(idx));
+    cards.probe.setAttribute('data-index',   String(idx));
+    cards.logit.setAttribute('data-index',   String(idx));
+    lbl.textContent = `Example ${idx + 1} of ${N}`;
   }
   document.getElementById('prevEx').addEventListener('click', () => go(idx - 1));
   document.getElementById('nextEx').addEventListener('click', () => go(idx + 1));
 })();
 </script>
-
 
 </body>
 </html>
