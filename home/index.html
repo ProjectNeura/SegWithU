@@ -132,7 +132,7 @@
   }
   section .lede {
     color: var(--ink-soft);
-    max-width: 780px;
+    max-width: 1280px;
     margin: 0 0 28px;
     font-size: 17px;
   }
@@ -278,7 +278,7 @@
     font-size: 16px;
     color: var(--ink-soft);
     line-height: 1.55;
-    max-width: 860px;
+    max-width: 1260px;
     margin-top: 16px;
   }
   .method-caption b { color: var(--ink); }
@@ -590,13 +590,13 @@
                 data-label="Feature Maps"></button>
 
         <!-- Probe Response cube + Probe Map -->
-        <!-- <button class="hot" style="left:36%;   top:33%;   width:13.5%; height:14%;"
-                data-src="assets/probe_response_0.html" data-title="Probe Response" data-tag="rank-1 posterior probes"
-                data-label="Probe Response"></button> -->
-
         <button class="hot" style="left:51.7%;   top:23.5%;   width:12.5%;   height:16.8%;"
-                data-series="probe_response" data-index="0"
+                data-src="assets/probe_map.html" data-title="Probe Map" data-tag="Probe Map"
                 data-label="Probe Map"></button>
+
+        <button class="hot" style="left:34.8%;   top:23.5%;   width:12.5%;   height:18.4%;"
+                data-series="probe_response" data-index="0"
+                data-label="Probe Response"></button>
 
         <!-- Entropy Map (right) -->
         <button class="hot" style="left:86%;   top:28.9%;   width:12.5%; height:16.9%;"
@@ -736,8 +736,8 @@
     probe_response: {
       label: 'Probe Response',
       items: [
-        { src: 'assets/probe_response_0.html', title: 'Probe Response — Example 0', tag: 'rank-1 probes · ex 0' },
-        { src: 'assets/probe_response_1.html', title: 'Probe Response — Example 1', tag: 'rank-1 probes · ex 1' },
+        { src: 'assets/probe_response_0.html', title: 'Probe Response 1', tag: 'rank-1 probes · ex 0' },
+        { src: 'assets/probe_response_1.html', title: 'Probe Response 2', tag: 'rank-1 probes · ex 1' },
       ],
     },
   };
