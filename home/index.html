@@ -1,662 +1,826 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SegWithU — Uncertainty as Perturbation Energy</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=Source+Sans+3:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #fbfaf7;
-    --ink: #1a1a1a;
-    --ink-soft: #4a4a4a;
-    --muted: #8a8a8a;
-    --rule: #e5e2dc;
-    --card: #f3f1ec;
-    --card-2: #efece5;
-    --accent: #c2410c;       /* burnt orange, matches the "learnable" boxes in the figure */
-    --accent-soft: #fde4d3;
-    --link: #1d4ed8;
-    --max: 1080px;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Source Sans 3', system-ui, sans-serif;
-    font-size: 17px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: var(--link); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SegWithU — Uncertainty as Perturbation Energy</title>
+    <link rel="icon" type="image/png"
+          href="https://raw.githubusercontent.com/ProjectNeura/ProjectNeura/5ea0c73a40ad560e179c152ff3660d03924ef6e1/img/logo.png"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=Source+Sans+3:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fbfaf7;
+            --ink: #1a1a1a;
+            --ink-soft: #4a4a4a;
+            --muted: #8a8a8a;
+            --rule: #e5e2dc;
+            --card: #f3f1ec;
+            --card-2: #efece5;
+            --accent: #c2410c; /* burnt orange, matches the "learnable" boxes in the figure */
+            --accent-soft: #fde4d3;
+            --link: #1d4ed8;
+            --max: 1080px;
+        }
 
-  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
-  .wrap-wide { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
+        * {
+            box-sizing: border-box;
+        }
 
-  /* HERO */
-  header.hero {
-    padding: 72px 24px 40px;
-    text-align: center;
-    border-bottom: 1px solid var(--rule);
-  }
-  header.hero h1 {
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    font-size: clamp(28px, 4vw, 44px);
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    margin: 0 auto 6px;
-    max-width: 880px;
-  }
-  header.hero h1 .sub {
-    display: block;
-    font-style: italic;
-    font-weight: 400;
-    font-size: 0.78em;
-    color: var(--ink-soft);
-    margin-top: 8px;
-  }
-  .authors {
-    margin: 24px auto 8px;
-    max-width: 780px;
-    color: var(--ink-soft);
-    font-size: 17px;
-  }
-  .authors .a {
-    display: inline-block;
-    margin: 0 10px;
-    white-space: nowrap;
-  }
-  .authors .a sup { color: var(--accent); font-weight: 600; }
-  .affil {
-    color: var(--muted);
-    font-size: 15px;
-    margin-bottom: 6px;
-  }
-  .affil .a { display: inline-block; margin: 0 10px; }
-  .affil sup { color: var(--accent); font-weight: 600; }
-  .venue {
-    color: var(--ink);
-    font-style: italic;
-    font-family: 'Source Serif 4', serif;
-    margin: 14px 0 22px;
-    font-size: 16px;
-  }
-  .badges {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 8px;
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 18px;
-    background: var(--ink);
-    color: var(--bg);
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: transform .15s ease, background .15s ease;
-  }
-  .badge:hover { background: var(--accent); text-decoration: none; transform: translateY(-1px); }
-  .badge svg { width: 14px; height: 14px; }
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
 
-  /* SECTIONS */
-  section {
-    padding: 56px 24px;
-    border-bottom: 1px solid var(--rule);
-  }
-  section h2 {
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    font-size: 28px;
-    letter-spacing: -0.01em;
-    margin: 0 0 8px;
-  }
-  section h2::before {
-    content: "";
-    display: inline-block;
-    width: 6px;
-    height: 22px;
-    background: var(--accent);
-    margin-right: 12px;
-    transform: translateY(3px);
-    border-radius: 1px;
-  }
-  section .lede {
-    color: var(--ink-soft);
-    max-width: 1280px;
-    margin: 0 0 28px;
-    font-size: 17px;
-  }
-  section .prose {
-    color: var(--ink);
-    max-width: 780px;
-    margin: 0 0 18px;
-    font-size: 17px;
-    line-height: 1.65;
-  }
-  section .prose b { color: var(--accent); font-weight: 600; }
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Source Sans 3', system-ui, sans-serif;
+            font-size: 17px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  /* TL;DR */
-  .tldr {
-    background: var(--card);
-    border-left: 3px solid var(--accent);
-    padding: 22px 26px;
-    margin: 28px auto 0;
-    max-width: var(--max);
-    font-family: 'Source Serif 4', serif;
-    font-style: italic;
-    font-size: 19px;
-    line-height: 1.5;
-    color: var(--ink);
-  }
-  .tldr b { font-style: normal; color: var(--accent); font-weight: 600; }
+        a {
+            color: var(--link);
+            text-decoration: none;
+        }
 
-  /* ===================== INTERACTIVE METHOD FIGURE ===================== */
-  .method-figure {
-    margin: 16px 0 20px;
-    background: var(--card);
-    padding: 22px;
-    border-radius: 10px;
-    border: 1px solid var(--rule);
-  }
-  /* Reserve the figure's intrinsic aspect ratio so layout never collapses,
-     even if the PNG fails to load (you'll see a placeholder rather than a strip). */
-  .arch-wrap {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 3508 / 2481;     /* swu-arch.png native ratio */
-    line-height: 0;
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fff;
-  }
-  .arch-wrap img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
-  }
-  /* Visible placeholder if the image fails to load */
-  .arch-wrap::before {
-    content: "swu-arch.png — figure not found at this path";
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    letter-spacing: 0.04em;
-    text-align: center;
-    padding: 0 24px;
-    z-index: 0;
-  }
-  .arch-wrap img { z-index: 1; }
-  /* hotspots are absolutely-positioned in % over the image */
-  .hot {
-    position: absolute;
-    border: 1.5px dashed rgba(194, 65, 12, 0.35);
-    background: rgba(194, 65, 12, 0.04);
-    cursor: pointer;
-    border-radius: 6px;
-    padding: 0;
-    transition: background .15s ease, box-shadow .15s ease, border-color .15s ease, transform .15s ease;
-    z-index: 2;
-  }
-  .hot:hover, .hot:focus-visible {
-    background: rgba(194, 65, 12, 0.18);
-    border-color: var(--accent);
-    border-style: solid;
-    box-shadow: 0 0 0 4px rgba(194, 65, 12, 0.12);
-    transform: scale(1.02);
-    outline: none;
-  }
-  /* small "click to view" pulse-tag visible on hover */
-  .hot::after {
-    content: attr(data-label);
-    position: absolute;
-    top: -26px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--ink);
-    color: var(--bg);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 4px 8px;
-    border-radius: 3px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .15s ease, transform .15s ease;
-  }
-  .hot:hover::after, .hot:focus-visible::after {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-2px);
-  }
-  .hot.below::after { top: auto; bottom: -26px; }
-  .hot.below:hover::after, .hot.below:focus-visible::after {
-    transform: translateX(-50%) translateY(2px);
-  }
+        a:hover {
+            text-decoration: underline;
+        }
 
-  .arch-legend {
-    margin-top: 14px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    align-items: center;
-    color: var(--ink-soft);
-    font-size: 13px;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.03em;
-  }
-  .arch-legend .swatch {
-    display: inline-block;
-    width: 14px; height: 14px;
-    border-radius: 3px;
-    background: rgba(194, 65, 12, 0.04);
-    border: 1.5px dashed rgba(194, 65, 12, 0.55);
-    vertical-align: middle;
-    margin-right: 6px;
-  }
+        .wrap {
+            max-width: var(--max);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
-  .method-caption {
-    font-family: 'Source Serif 4', serif;
-    font-size: 16px;
-    color: var(--ink-soft);
-    line-height: 1.55;
-    max-width: 1260px;
-    margin-top: 16px;
-  }
-  .method-caption b { color: var(--ink); }
+        .wrap-wide {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
-  /* ===================== INLINE GALLERY (case-8 maps grid) ===================== */
-  .map-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 22px;
-  }
-  @media (max-width: 900px) {
-    .map-grid { grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (max-width: 640px) {
-    .map-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  .map-tile {
-    background: var(--card);
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-    padding: 14px 14px 12px;
-    cursor: pointer;
-    transition: transform .12s ease, border-color .15s ease, background .15s ease;
-    text-align: left;
-    font: inherit;
-    color: inherit;
-    width: 100%;
-  }
-  .map-tile:hover {
-    transform: translateY(-1px);
-    border-color: var(--accent);
-    background: var(--card-2);
-  }
-  .map-tile .name {
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    font-size: 14.5px;
-    color: var(--ink);
-    margin: 0 0 2px;
-  }
-  .map-tile .meta {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .map-tile .meta .arrow {
-    color: var(--accent);
-    margin-left: 4px;
-  }
+        /* HERO */
+        header.hero {
+            padding: 72px 24px 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--rule);
+        }
 
-  /* ===================== MODAL ===================== */
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(20, 18, 14, 0.55);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 24px;
-    backdrop-filter: blur(2px);
-  }
-  .modal-backdrop.open { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 12px;
-    width: min(1100px, 100%);
-    height: min(820px, 92vh);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--rule);
-  }
-  .modal-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 18px;
-    background: var(--card-2);
-    border-bottom: 1px solid var(--rule);
-  }
-  .modal-title {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    min-width: 0;
-    flex: 1;
-  }
-  .modal-title h3 {
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    font-size: 18px;
-    color: var(--ink);
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .modal-title .tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    flex-shrink: 0;
-  }
-  .modal-close {
-    width: 36px; height: 36px;
-    border: 0;
-    background: transparent;
-    border-radius: 999px;
-    cursor: pointer;
-    color: var(--ink-soft);
-    font-size: 22px;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s ease, color .15s ease;
-    flex-shrink: 0;
-  }
-  .modal-close:hover { background: var(--accent); color: var(--bg); }
+        header.hero h1 {
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: clamp(28px, 4vw, 44px);
+            line-height: 1.15;
+            letter-spacing: -0.01em;
+            margin: 0 auto 6px;
+            max-width: 880px;
+        }
 
-  /* In-modal series navigation (prev / counter / next) */
-  .modal-nav {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    background: var(--bg);
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    padding: 3px;
-    flex-shrink: 0;
-  }
-  .modal-nav[hidden] { display: none; }
-  .modal-arrow {
-    width: 30px; height: 30px;
-    border: 0;
-    background: transparent;
-    border-radius: 999px;
-    cursor: pointer;
-    color: var(--ink);
-    font-size: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s ease, color .15s ease;
-  }
-  .modal-arrow:hover:not(:disabled) { background: var(--accent); color: var(--bg); }
-  .modal-arrow:disabled {
-    color: var(--muted);
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .modal-counter {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    color: var(--ink-soft);
-    padding: 0 10px;
-    user-select: none;
-    min-width: 44px;
-    text-align: center;
-  }
-  .modal-body {
-    flex: 1;
-    background: #fff;
-    position: relative;
-    min-height: 0;
-  }
-  .modal-body iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-  }
-  .modal-body .spinner {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    pointer-events: none;
-  }
-  .modal-body.loaded .spinner { display: none; }
+        header.hero h1 .sub {
+            display: block;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 0.78em;
+            color: var(--ink-soft);
+            margin-top: 8px;
+        }
 
-  /* BIBTEX */
-  pre.bibtex {
-    background: var(--ink);
-    color: #f3f1ec;
-    padding: 22px 24px;
-    border-radius: 8px;
-    overflow-x: auto;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    margin: 16px 0 0;
-  }
-  pre.bibtex .k { color: #fbbf77; }
-  pre.bibtex .v { color: #c4d6ff; }
+        .authors {
+            margin: 24px auto 8px;
+            max-width: 780px;
+            color: var(--ink-soft);
+            font-size: 17px;
+        }
 
-  /* FOOTER */
-  footer {
-    padding: 32px 24px 56px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.7;
-  }
+        .authors .a {
+            display: inline-block;
+            margin: 0 10px;
+            white-space: nowrap;
+        }
 
-  /* Anchor offsets for nav scroll */
-  .anchor { scroll-margin-top: 24px; }
-</style>
+        .authors .a sup {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .affil {
+            color: var(--muted);
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .affil .a {
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .affil sup {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .venue {
+            color: var(--ink);
+            font-style: italic;
+            font-family: 'Source Serif 4', serif;
+            margin: 14px 0 22px;
+            font-size: 16px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            background: var(--ink);
+            color: var(--bg);
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform .15s ease, background .15s ease;
+        }
+
+        .badge:hover {
+            background: var(--accent);
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* SECTIONS */
+        section {
+            padding: 56px 24px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        section h2 {
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 28px;
+            letter-spacing: -0.01em;
+            margin: 0 0 8px;
+        }
+
+        section h2::before {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 22px;
+            background: var(--accent);
+            margin-right: 12px;
+            transform: translateY(3px);
+            border-radius: 1px;
+        }
+
+        section .lede {
+            color: var(--ink-soft);
+            max-width: 1280px;
+            margin: 0 0 28px;
+            font-size: 17px;
+        }
+
+        section .prose {
+            color: var(--ink);
+            max-width: 780px;
+            margin: 0 0 18px;
+            font-size: 17px;
+            line-height: 1.65;
+        }
+
+        section .prose b {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* TL;DR */
+        .tldr {
+            background: var(--card);
+            border-left: 3px solid var(--accent);
+            padding: 22px 26px;
+            margin: 28px auto 0;
+            max-width: var(--max);
+            font-family: 'Source Serif 4', serif;
+            font-style: italic;
+            font-size: 19px;
+            line-height: 1.5;
+            color: var(--ink);
+        }
+
+        .tldr b {
+            font-style: normal;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ===================== INTERACTIVE METHOD FIGURE ===================== */
+        .method-figure {
+            margin: 16px 0 20px;
+            background: var(--card);
+            padding: 22px;
+            border-radius: 10px;
+            border: 1px solid var(--rule);
+        }
+
+        /* Reserve the figure's intrinsic aspect ratio so layout never collapses,
+           even if the PNG fails to load (you'll see a placeholder rather than a strip). */
+        .arch-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3508 / 2481; /* swu-arch.png native ratio */
+            line-height: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .arch-wrap img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        /* Visible placeholder if the image fails to load */
+        .arch-wrap::before {
+            content: "swu-arch.png — figure not found at this path";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            text-align: center;
+            padding: 0 24px;
+            z-index: 0;
+        }
+
+        .arch-wrap img {
+            z-index: 1;
+        }
+
+        /* hotspots are absolutely-positioned in % over the image */
+        .hot {
+            position: absolute;
+            border: 1.5px dashed rgba(194, 65, 12, 0.35);
+            background: rgba(194, 65, 12, 0.04);
+            cursor: pointer;
+            border-radius: 6px;
+            padding: 0;
+            transition: background .15s ease, box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+            z-index: 2;
+        }
+
+        .hot:hover, .hot:focus-visible {
+            background: rgba(194, 65, 12, 0.18);
+            border-color: var(--accent);
+            border-style: solid;
+            box-shadow: 0 0 0 4px rgba(194, 65, 12, 0.12);
+            transform: scale(1.02);
+            outline: none;
+        }
+
+        /* small "click to view" pulse-tag visible on hover */
+        .hot::after {
+            content: attr(data-label);
+            position: absolute;
+            top: -26px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            color: var(--bg);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 3px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .15s ease, transform .15s ease;
+        }
+
+        .hot:hover::after, .hot:focus-visible::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .hot.below::after {
+            top: auto;
+            bottom: -26px;
+        }
+
+        .hot.below:hover::after, .hot.below:focus-visible::after {
+            transform: translateX(-50%) translateY(2px);
+        }
+
+        .arch-legend {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            color: var(--ink-soft);
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.03em;
+        }
+
+        .arch-legend .swatch {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            background: rgba(194, 65, 12, 0.04);
+            border: 1.5px dashed rgba(194, 65, 12, 0.55);
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .method-caption {
+            font-family: 'Source Serif 4', serif;
+            font-size: 16px;
+            color: var(--ink-soft);
+            line-height: 1.55;
+            max-width: 1260px;
+            margin-top: 16px;
+        }
+
+        .method-caption b {
+            color: var(--ink);
+        }
+
+        /* ===================== INLINE GALLERY (case-8 maps grid) ===================== */
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        @media (max-width: 900px) {
+            .map-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .map-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .map-tile {
+            background: var(--card);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 14px 14px 12px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+            text-align: left;
+            font: inherit;
+            color: inherit;
+            width: 100%;
+        }
+
+        .map-tile:hover {
+            transform: translateY(-1px);
+            border-color: var(--accent);
+            background: var(--card-2);
+        }
+
+        .map-tile .name {
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 14.5px;
+            color: var(--ink);
+            margin: 0 0 2px;
+        }
+
+        .map-tile .meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .map-tile .meta .arrow {
+            color: var(--accent);
+            margin-left: 4px;
+        }
+
+        /* ===================== MODAL ===================== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 18, 14, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 24px;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            width: min(1100px, 100%);
+            height: min(820px, 92vh);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--rule);
+        }
+
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 18px;
+            background: var(--card-2);
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .modal-title h3 {
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--ink);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .modal-title .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: 0;
+            background: transparent;
+            border-radius: 999px;
+            cursor: pointer;
+            color: var(--ink-soft);
+            font-size: 22px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s ease, color .15s ease;
+            flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        /* In-modal series navigation (prev / counter / next) */
+        .modal-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            background: var(--bg);
+            border: 1px solid var(--rule);
+            border-radius: 999px;
+            padding: 3px;
+            flex-shrink: 0;
+        }
+
+        .modal-nav[hidden] {
+            display: none;
+        }
+
+        .modal-arrow {
+            width: 30px;
+            height: 30px;
+            border: 0;
+            background: transparent;
+            border-radius: 999px;
+            cursor: pointer;
+            color: var(--ink);
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .modal-arrow:hover:not(:disabled) {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .modal-arrow:disabled {
+            color: var(--muted);
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .modal-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            color: var(--ink-soft);
+            padding: 0 10px;
+            user-select: none;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .modal-body {
+            flex: 1;
+            background: #fff;
+            position: relative;
+            min-height: 0;
+        }
+
+        .modal-body iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+
+        .modal-body .spinner {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        .modal-body.loaded .spinner {
+            display: none;
+        }
+
+        /* BIBTEX */
+        pre.bibtex {
+            background: var(--ink);
+            color: #f3f1ec;
+            padding: 22px 24px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 16px 0 0;
+        }
+
+        pre.bibtex .k {
+            color: #fbbf77;
+        }
+
+        pre.bibtex .v {
+            color: #c4d6ff;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 32px 24px 56px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        /* Anchor offsets for nav scroll */
+        .anchor {
+            scroll-margin-top: 24px;
+        }
+    </style>
 </head>
 <body>
 
 <header class="hero">
-  <div class="wrap">
-    <h1>
-      SegWithU
-      <span class="sub">Uncertainty as Perturbation Energy for Single-Forward-Pass Risk-Aware Medical Image Segmentation</span>
-    </h1>
-    <div class="authors">
-      <span class="a">Tianhao Fu<sup>1,4,5,6</sup></span>
-      <span class="a">Austin Wang<sup>†,2,5,6</sup></span>
-      <span class="a">Charles Chen<sup>†,1,5,6</sup></span>
-      <span class="a">Roby Aldave-Garza<sup>†,3,5,6</sup></span>
-      <span class="a">Yucheng Chen<sup>5,7</sup></span>
+    <div class="wrap">
+        <h1>
+            SegWithU
+            <span class="sub">Uncertainty as Perturbation Energy for Single-Forward-Pass Risk-Aware Medical Image Segmentation</span>
+        </h1>
+        <div class="authors">
+            <span class="a">Tianhao Fu<sup>1,4,5,6</sup></span>
+            <span class="a">Austin Wang<sup>†,2,5,6</sup></span>
+            <span class="a">Charles Chen<sup>†,1,5,6</sup></span>
+            <span class="a">Roby Aldave-Garza<sup>†,3,5,6</sup></span>
+            <span class="a">Yucheng Chen<sup>5,7</sup></span>
+        </div>
+        <div class="affil">
+            <span class="a"><sup>1</sup> University of Toronto</span>
+            <span class="a"><sup>2</sup> McGill University</span>
+            <span class="a"><sup>3</sup> University of Waterloo</span>
+            <span class="a"><sup>4</sup> Vector Institute</span>
+            <br/>
+            <span class="a"><sup>5</sup> Project Neura</span>
+            <span class="a"><sup>6</sup> UTMIST</span>
+            <span class="a"><sup>7</sup> Amplimit</span>
+            <br/>
+            <span class="a" style="font-size:13px;">† Equal contributions</span>
+        </div>
+        <div class="venue">arXiv 2604.15271 · April 2026</div>
+        <div class="badges">
+            <a class="badge" href="https://arxiv.org/pdf/2604.15271">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 7V3.5L19.5 9H14z"/>
+                </svg>
+                Paper
+            </a>
+            <a class="badge" href="https://arxiv.org/abs/2604.15271">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                arXiv
+            </a>
+            <a class="badge" href="https://github.com/ProjectNeura/SegWithU">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.64.71 1.03 1.61 1.03 2.71 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12 22 6.48 17.52 2 12 2z"/>
+                </svg>
+                Code
+            </a>
+        </div>
     </div>
-    <div class="affil">
-      <span class="a"><sup>1</sup> University of Toronto</span>
-      <span class="a"><sup>2</sup> McGill University</span>
-      <span class="a"><sup>3</sup> University of Waterloo</span>
-      <span class="a"><sup>4</sup> Vector Institute</span>
-      <br/>
-      <span class="a"><sup>5</sup> Project Neura</span>
-      <span class="a"><sup>6</sup> UTMIST</span>
-      <span class="a"><sup>7</sup> Amplimit</span>
-      <br/>
-      <span class="a" style="font-size:13px;">† Equal contributions</span>
-    </div>
-    <div class="venue">arXiv 2604.15271 · April 2026</div>
-    <div class="badges">
-      <a class="badge" href="https://arxiv.org/pdf/2604.15271">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 7V3.5L19.5 9H14z"/></svg>
-        Paper
-      </a>
-      <a class="badge" href="https://arxiv.org/abs/2604.15271">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        arXiv
-      </a>
-      <a class="badge" href="https://github.com/ProjectNeura/SegWithU">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.64.71 1.03 1.61 1.03 2.71 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12 22 6.48 17.52 2 12 2z"/></svg>
-        Code
-      </a>
-    </div>
-  </div>
 </header>
 
 <div class="tldr">
-  <b>TL;DR.</b> SegWithU wraps a <i>frozen</i> pretrained segmentation backbone with a lightweight uncertainty head. It models uncertainty as <b>perturbation energy</b> in a compact probe space using rank-1 posterior probes, yielding two voxel-wise maps, a <i>calibration</i> map for probability tempering and a <i>ranking</i> map for error detection, in a single forward pass.
+    <b>TL;DR.</b> SegWithU wraps a <i>frozen</i> pretrained segmentation backbone with a lightweight uncertainty head.
+    It models uncertainty as <b>perturbation energy</b> in a compact probe space using rank-1 posterior probes, yielding
+    two voxel-wise maps, a <i>calibration</i> map for probability tempering and a <i>ranking</i> map for error
+    detection, in a single forward pass.
 </div>
 
 
 <!-- ===================== METHOD (interactive figure) ===================== -->
 <section class="anchor" id="method">
-  <div class="wrap-wide">
-    <h2>Method</h2>
-    <p class="lede">SegWithU treats the segmentation backbone as a fixed predictor and learns a small uncertainty head on tapped intermediate features. Uncertainty is parameterised as <b>perturbation energy</b>: rank-1 probes induce latent perturbations whose effect on output logits is the basis for the epistemic signal. <b>Click any labeled box</b> in the figure below to open the corresponding interactive 3D rendering.</p>
+    <div class="wrap-wide">
+        <h2>Method</h2>
+        <p class="lede">SegWithU treats the segmentation backbone as a fixed predictor and learns a small uncertainty
+            head on tapped intermediate features. Uncertainty is parameterised as <b>perturbation energy</b>: rank-1
+            probes induce latent perturbations whose effect on output logits is the basis for the epistemic signal. <b>Click
+                any labeled box</b> in the figure below to open the corresponding interactive 3D rendering.</p>
 
-    <div class="method-figure">
-      <div class="arch-wrap" id="archWrap">
-        <img src="assets/swu-arch.png" alt="SegWithU architecture diagram. Frozen backbone, multi-scale feature taps, fusion, probe response, delta-logits, residual, epistemic and aleatoric maps, and downstream calibration, anchor, ranking, weight, margin, and entropy maps." />
+        <div class="method-figure">
+            <div class="arch-wrap" id="archWrap">
+                <img src="assets/swu-arch.png"
+                     alt="SegWithU architecture diagram. Frozen backbone, multi-scale feature taps, fusion, probe response, delta-logits, residual, epistemic and aleatoric maps, and downstream calibration, anchor, ranking, weight, margin, and entropy maps."/>
 
-        <!--
-          Hotspots are positioned in % of the underlying image (3508 x 2481).
-          Each button opens the interactive Plotly visualization in a modal.
-          data-src   : the html file to load
-          data-title : human-readable title
-          data-tag   : small monospace tag shown in the modal header
-        -->
+                <!--
+                  Hotspots are positioned in % of the underlying image (3508 x 2481).
+                  Each button opens the interactive Plotly visualization in a modal.
+                  data-src   : the html file to load
+                  data-title : human-readable title
+                  data-tag   : small monospace tag shown in the modal header
+                -->
 
-        <!-- Top row (labels appear below to avoid clipping at the top) -->
-        <button class="hot below" style="left:4.1%;  top:4.3%;  width:12.5%; height:16.6%;"
-                data-src="assets/input_case8.html"  data-title="Input Volume"            data-tag="case 8 · stage 01"
-                data-label="Input Volume"></button>
+                <!-- Top row (labels appear below to avoid clipping at the top) -->
+                <button class="hot below" style="left:4.1%;  top:4.3%;  width:12.5%; height:16.6%;"
+                        data-src="assets/input_case8.html" data-title="Input Volume" data-tag="case 8 · stage 01"
+                        data-label="Input Volume"></button>
 
-        <button class="hot below" style="left:68.5%;   top:3.5%;  width:12.5%;   height:18%;"
-                data-series="logits" data-index="0"
-                data-label="Logits"></button>
+                <button class="hot below" style="left:68.5%;   top:3.5%;  width:12.5%;   height:18%;"
+                        data-series="logits" data-index="0"
+                        data-label="Logits"></button>
 
-        <button class="hot below" style="left:86%;   top:4.1%;  width:12.5%; height:17%;"
-                data-src="assets/pred_seg_case8.html" data-title="Probabilities (Predicted Segmentation)" data-tag="argmax(softmax(z))"
-                data-label="Probabilities"></button>
+                <button class="hot below" style="left:86%;   top:4.1%;  width:12.5%; height:17%;"
+                        data-src="assets/pred_seg_case8.html" data-title="Probabilities (Predicted Segmentation)"
+                        data-tag="argmax(softmax(z))"
+                        data-label="Probabilities"></button>
 
-        <!-- Multi-scale feature maps stack (left side) -->
-        <button class="hot" style="left:3.1%;  top:29%;   width:14.6%;   height:42%;"
-                data-series="feature_map_0" data-index="0"
-                data-label="Feature Maps"></button>
+                <!-- Multi-scale feature maps stack (left side) -->
+                <button class="hot" style="left:3.1%;  top:29%;   width:14.6%;   height:42%;"
+                        data-series="feature_map_0" data-index="0"
+                        data-label="Feature Maps"></button>
 
-        <!-- Probe Response cube + Probe Map -->
-        <button class="hot" style="left:51.7%;   top:23.5%;   width:12.5%;   height:16.8%;"
-                data-src="assets/probe_map.html" data-title="Probe Map" data-tag="Probe Map"
-                data-label="Probe Map"></button>
+                <!-- Probe Response cube + Probe Map -->
+                <button class="hot" style="left:51.7%;   top:23.5%;   width:12.5%;   height:16.8%;"
+                        data-src="assets/probe_map.html" data-title="Probe Map" data-tag="Probe Map"
+                        data-label="Probe Map"></button>
 
-        <button class="hot" style="left:34.8%;   top:23.5%;   width:12.5%;   height:18.4%;"
-                data-series="probe_response" data-index="0"
-                data-label="Probe Response"></button>
+                <button class="hot" style="left:34.8%;   top:23.5%;   width:12.5%;   height:18.4%;"
+                        data-series="probe_response" data-index="0"
+                        data-label="Probe Response"></button>
 
-        <!-- Entropy Map (right) -->
-        <button class="hot" style="left:86%;   top:28.9%;   width:12.5%; height:16.9%;"
-                data-src="assets/entropy_map.html" data-title="Entropy Map" data-tag="H(p) = −Σ p_c log p_c"
-                data-label="Entropy"></button>
+                <!-- Entropy Map (right) -->
+                <button class="hot" style="left:86%;   top:28.9%;   width:12.5%; height:16.9%;"
+                        data-src="assets/entropy_map.html" data-title="Entropy Map" data-tag="H(p) = −Σ p_c log p_c"
+                        data-label="Entropy"></button>
 
-        <!-- Residual Map (center) -->
-        <button class="hot below" style="left:51.8%;   top:41.8%;   width:12.2%;   height:17%;"
-                data-src="assets/residual_case8.html" data-title="Residual Map" data-tag="δz from probes"
-                data-label="Residual"></button>
+                <!-- Residual Map (center) -->
+                <button class="hot below" style="left:51.8%;   top:41.8%;   width:12.2%;   height:17%;"
+                        data-src="assets/residual_case8.html" data-title="Residual Map" data-tag="δz from probes"
+                        data-label="Residual"></button>
 
-        <!-- Margin Map -->
-        <button class="hot below" style="left:68.5%;   top:58.5%;   width:12.5%; height:16.9%;"
-                data-src="assets/margin_case8.html" data-title="Margin Map" data-tag="z₍₁₎ − z₍₂₎"
-                data-label="Margin"></button>
+                <!-- Margin Map -->
+                <button class="hot below" style="left:68.5%;   top:58.5%;   width:12.5%; height:16.9%;"
+                        data-src="assets/margin_case8.html" data-title="Margin Map" data-tag="z₍₁₎ − z₍₂₎"
+                        data-label="Margin"></button>
 
-        <!-- Weight Map -->
-        <button class="hot below" style="left:86%;   top:58.5%;   width:12.5%; height:16.9%;"
-                data-src="assets/weight_case8.html" data-title="Weight Map" data-tag="ambiguity weight"
-                data-label="Weight"></button>
+                <!-- Weight Map -->
+                <button class="hot below" style="left:86%;   top:58.5%;   width:12.5%; height:16.9%;"
+                        data-src="assets/weight_case8.html" data-title="Weight Map" data-tag="ambiguity weight"
+                        data-label="Weight"></button>
 
-        <!-- Epistemic (lower-left of center) -->
-        <button class="hot below" style="left:34.9%;   top:58.5%;   width:12.5%; height:16.8%;"
-                data-src="assets/epistemic_case8.html" data-title="Epistemic Uncertainty" data-tag="Var(δz)"
-                data-label="Epistemic"></button>
+                <!-- Epistemic (lower-left of center) -->
+                <button class="hot below" style="left:34.9%;   top:58.5%;   width:12.5%; height:16.8%;"
+                        data-src="assets/epistemic_case8.html" data-title="Epistemic Uncertainty" data-tag="Var(δz)"
+                        data-label="Epistemic"></button>
 
-        <!-- Bottom row: Aleatoric, Calibration, Anchor, Ranking -->
-        <button class="hot below" style="left:40.6%;   top:81.2%;   width:12.5%; height:16.8%;"
-                data-src="assets/aleatoric_case8.html" data-title="Aleatoric Uncertainty" data-tag="data-intrinsic noise"
-                data-label="Aleatoric"></button>
+                <!-- Bottom row: Aleatoric, Calibration, Anchor, Ranking -->
+                <button class="hot below" style="left:40.6%;   top:81.2%;   width:12.5%; height:16.8%;"
+                        data-src="assets/aleatoric_case8.html" data-title="Aleatoric Uncertainty"
+                        data-tag="data-intrinsic noise"
+                        data-label="Aleatoric"></button>
 
-        <button class="hot below" style="left:54.6%;   top:81.2%;   width:12.5%; height:16.8%;"
-                data-src="assets/calibration_case8.html" data-title="Calibration Map" data-tag="z̃ = z / √(1+U_cal)"
-                data-label="Calibration"></button>
+                <button class="hot below" style="left:54.6%;   top:81.2%;   width:12.5%; height:16.8%;"
+                        data-src="assets/calibration_case8.html" data-title="Calibration Map"
+                        data-tag="z̃ = z / √(1+U_cal)"
+                        data-label="Calibration"></button>
 
-        <button class="hot below" style="left:68.55%; top:81.2%;   width:12.5%; height:16.8%;"
-                data-src="assets/anchor_case8.html" data-title="Anchor Map" data-tag="error-anchor signal"
-                data-label="Anchor"></button>
+                <button class="hot below" style="left:68.55%; top:81.2%;   width:12.5%; height:16.8%;"
+                        data-src="assets/anchor_case8.html" data-title="Anchor Map" data-tag="error-anchor signal"
+                        data-label="Anchor"></button>
 
-        <button class="hot below" style="left:86.05%;   top:81.2%;   width:12.5%; height:16.8%;"
-                data-src="assets/ranking_case8.html" data-title="Ranking Map" data-tag="error ordering / selective prediction"
-                data-label="Ranking"></button>
-      </div>
+                <button class="hot below" style="left:86.05%;   top:81.2%;   width:12.5%; height:16.8%;"
+                        data-src="assets/ranking_case8.html" data-title="Ranking Map"
+                        data-tag="error ordering / selective prediction"
+                        data-label="Ranking"></button>
+            </div>
 
-      <div class="arch-legend">
-        <span><span class="swatch"></span>each dashed box is clickable — opens the interactive 3D map</span>
-      </div>
+            <div class="arch-legend">
+                <span><span class="swatch"></span>each dashed box is clickable — opens the interactive 3D map</span>
+            </div>
 
-      <p class="method-caption">
-        <b>Overview of SegWithU.</b> A <i>frozen</i> segmentation backbone produces logits and a probability map. Multi-scale intermediate features are tapped (purple) and fused into a probe response that yields a <b>probe map</b>. Rank-1 posterior probes induce class-logit perturbations (the <b>residual map</b>), whose variance gives the <b>epistemic</b> map. In parallel, an <b>aleatoric</b> branch reads the fused features. Auxiliary signals — entropy, margin, ambiguity weight — combine with these via lightweight 1×1 convolutions to produce two functionally distinct outputs: a <b>calibration</b> map that tempers logits via <i>z̃ = z / √(1+U<sub>cal</sub>)</i>, and an <b>anchor → ranking</b> map optimized for error ordering and selective prediction. Only the orange modules are learnable; the backbone is never modified.
-      </p>
+            <p class="method-caption">
+                <b>Overview of SegWithU.</b> A <i>frozen</i> segmentation backbone produces logits and a probability
+                map. Multi-scale intermediate features are tapped (purple) and fused into a probe response that yields a
+                <b>probe map</b>. Rank-1 posterior probes induce class-logit perturbations (the <b>residual map</b>),
+                whose variance gives the <b>epistemic</b> map. In parallel, an <b>aleatoric</b> branch reads the fused
+                features. Auxiliary signals — entropy, margin, ambiguity weight — combine with these via lightweight 1×1
+                convolutions to produce two functionally distinct outputs: a <b>calibration</b> map that tempers logits
+                via <i>z̃ = z / √(1+U<sub>cal</sub>)</i>, and an <b>anchor → ranking</b> map optimized for error
+                ordering and selective prediction. Only the orange modules are learnable; the backbone is never
+                modified.
+            </p>
+        </div>
     </div>
-  </div>
 </section>
 
 <!-- ===================== BIBTEX ===================== -->
 <section class="anchor" id="bibtex">
-  <div class="wrap">
-    <h2>BibTeX</h2>
-    <pre class="bibtex"><span class="k">@article</span>{fu2026segwithu,
+    <div class="wrap">
+        <h2>BibTeX</h2>
+        <pre class="bibtex"><span class="k">@article</span>{fu2026segwithu,
   <span class="k">author</span>    = {<span class="v">Fu, Tianhao and Wang, Austin and Chen, Charles and
               Aldave-Garza, Roby and Chen, Yucheng</span>},
   <span class="k">title</span>     = {<span class="v">SegWithU: Uncertainty as Perturbation Energy for
@@ -664,214 +828,233 @@
   <span class="k">journal</span>   = {<span class="v">arXiv preprint arXiv:2604.15271</span>},
   <span class="k">year</span>      = {<span class="v">2026</span>}
 }</pre>
-  </div>
+    </div>
 </section>
 
 <footer>
-  <div>SegWithU · Project Neura · 2026</div>
+    <div>SegWithU · Project Neura · 2026</div>
 </footer>
 
 <!-- ===================== MODAL (single, reused) ===================== -->
 <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal" role="document">
-    <div class="modal-head">
-      <div class="modal-title">
-        <h3 id="modalTitle">Map</h3>
-        <span class="tag" id="modalTag"></span>
-      </div>
-      <div class="modal-nav" id="modalNav" hidden>
-        <button class="modal-arrow" id="modalPrev" aria-label="Previous in series" title="Previous (←)">◀</button>
-        <span class="modal-counter" id="modalCounter">1 / 1</span>
-        <button class="modal-arrow" id="modalNext" aria-label="Next in series" title="Next (→)">▶</button>
-      </div>
-      <button class="modal-close" id="modalClose" aria-label="Close (Esc)" title="Close (Esc)">×</button>
+    <div class="modal" role="document">
+        <div class="modal-head">
+            <div class="modal-title">
+                <h3 id="modalTitle">Map</h3>
+                <span class="tag" id="modalTag"></span>
+            </div>
+            <div class="modal-nav" id="modalNav" hidden>
+                <button class="modal-arrow" id="modalPrev" aria-label="Previous in series" title="Previous (←)">◀
+                </button>
+                <span class="modal-counter" id="modalCounter">1 / 1</span>
+                <button class="modal-arrow" id="modalNext" aria-label="Next in series" title="Next (→)">▶</button>
+            </div>
+            <button class="modal-close" id="modalClose" aria-label="Close (Esc)" title="Close (Esc)">×</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div class="spinner">Loading interactive view…</div>
+            <iframe id="modalFrame" title="Interactive view" allow="fullscreen" loading="lazy"></iframe>
+        </div>
     </div>
-    <div class="modal-body" id="modalBody">
-      <div class="spinner">Loading interactive view…</div>
-      <iframe id="modalFrame" title="Interactive view" allow="fullscreen" loading="lazy"></iframe>
-    </div>
-  </div>
 </div>
 
 <script>
-/* ============================================================
- * Modal handling — every element with .open-modal OR .hot opens the
- * shared modal and loads its data-src into the iframe.
- *
- * Series support: a trigger may declare `data-series` (e.g., "logits",
- * "feature_map_0", "probe_response"). If declared, the modal shows
- * prev/next arrows that cycle through SERIES[name].items.
- * ============================================================ */
-(function() {
-  const modal      = document.getElementById('modal');
-  const modalBody  = document.getElementById('modalBody');
-  const frame      = document.getElementById('modalFrame');
-  const titleEl    = document.getElementById('modalTitle');
-  const tagEl      = document.getElementById('modalTag');
-  const closeBtn   = document.getElementById('modalClose');
-  const navWrap    = document.getElementById('modalNav');
-  const prevBtn    = document.getElementById('modalPrev');
-  const nextBtn    = document.getElementById('modalNext');
-  const counterEl  = document.getElementById('modalCounter');
+    /* ============================================================
+     * Modal handling — every element with .open-modal OR .hot opens the
+     * shared modal and loads its data-src into the iframe.
+     *
+     * Series support: a trigger may declare `data-series` (e.g., "logits",
+     * "feature_map_0", "probe_response"). If declared, the modal shows
+     * prev/next arrows that cycle through SERIES[name].items.
+     * ============================================================ */
+    (function () {
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modalBody');
+        const frame = document.getElementById('modalFrame');
+        const titleEl = document.getElementById('modalTitle');
+        const tagEl = document.getElementById('modalTag');
+        const closeBtn = document.getElementById('modalClose');
+        const navWrap = document.getElementById('modalNav');
+        const prevBtn = document.getElementById('modalPrev');
+        const nextBtn = document.getElementById('modalNext');
+        const counterEl = document.getElementById('modalCounter');
 
-  // Series definitions. Each item provides the file, an optional title
-  // override, and an optional tag override. The label below the counter
-  // (e.g. "Class 0") is `subtag` and it appends to the data-tag.
-  const SERIES = {
-    feature_map_0: {
-      label: 'Feature Map',
-      items: [
-        { src: 'assets/feature_map_0_0.html', title: 'Feature Map — Example 0', tag: 'tapped multi-scale · ex 0' },
-        { src: 'assets/feature_map_0_1.html', title: 'Feature Map — Example 1', tag: 'tapped multi-scale · ex 1' },
-      ],
-    },
-    logits: {
-      label: 'Logits',
-      items: [
-        { src: 'assets/logits_0.html', title: 'Logits — Class 0', tag: 'background' },
-        { src: 'assets/logits_1.html', title: 'Logits — Class 1', tag: 'class 1' },
-        { src: 'assets/logits_2.html', title: 'Logits — Class 2', tag: 'class 2' },
-      ],
-    },
-    probe_response: {
-      label: 'Probe Response',
-      items: [
-        { src: 'assets/probe_response_0.html', title: 'Probe Response 1', tag: 'rank-1 probes · ex 0' },
-        { src: 'assets/probe_response_1.html', title: 'Probe Response 2', tag: 'rank-1 probes · ex 1' },
-      ],
-    },
-  };
+        // Series definitions. Each item provides the file, an optional title
+        // override, and an optional tag override. The label below the counter
+        // (e.g. "Class 0") is `subtag` and it appends to the data-tag.
+        const SERIES = {
+            feature_map_0: {
+                label: 'Feature Map',
+                items: [
+                    {
+                        src: 'assets/feature_map_0_0.html',
+                        title: 'Feature Map — Example 0',
+                        tag: 'tapped multi-scale · ex 0'
+                    },
+                    {
+                        src: 'assets/feature_map_0_1.html',
+                        title: 'Feature Map — Example 1',
+                        tag: 'tapped multi-scale · ex 1'
+                    },
+                ],
+            },
+            logits: {
+                label: 'Logits',
+                items: [
+                    {src: 'assets/logits_0.html', title: 'Logits — Class 0', tag: 'background'},
+                    {src: 'assets/logits_1.html', title: 'Logits — Class 1', tag: 'class 1'},
+                    {src: 'assets/logits_2.html', title: 'Logits — Class 2', tag: 'class 2'},
+                ],
+            },
+            probe_response: {
+                label: 'Probe Response',
+                items: [
+                    {src: 'assets/probe_response_0.html', title: 'Probe Response 1', tag: 'rank-1 probes · ex 0'},
+                    {src: 'assets/probe_response_1.html', title: 'Probe Response 2', tag: 'rank-1 probes · ex 1'},
+                ],
+            },
+        };
 
-  let lastFocus    = null;
-  let activeSeries = null;     // string key into SERIES, or null
-  let activeIdx    = 0;
+        let lastFocus = null;
+        let activeSeries = null;     // string key into SERIES, or null
+        let activeIdx = 0;
 
-  function loadInto(src, title, tag) {
-    titleEl.textContent = title || 'Interactive view';
-    tagEl.textContent   = tag || '';
-    modalBody.classList.remove('loaded');
-    frame.src = src;
-  }
+        function loadInto(src, title, tag) {
+            titleEl.textContent = title || 'Interactive view';
+            tagEl.textContent = tag || '';
+            modalBody.classList.remove('loaded');
+            frame.src = src;
+        }
 
-  function renderNav() {
-    if (!activeSeries) {
-      navWrap.hidden = true;
-      return;
-    }
-    const series = SERIES[activeSeries];
-    navWrap.hidden = false;
-    counterEl.textContent = `${activeIdx + 1} / ${series.items.length}`;
-    prevBtn.disabled = activeIdx <= 0;
-    nextBtn.disabled = activeIdx >= series.items.length - 1;
-  }
+        function renderNav() {
+            if (!activeSeries) {
+                navWrap.hidden = true;
+                return;
+            }
+            const series = SERIES[activeSeries];
+            navWrap.hidden = false;
+            counterEl.textContent = `${activeIdx + 1} / ${series.items.length}`;
+            prevBtn.disabled = activeIdx <= 0;
+            nextBtn.disabled = activeIdx >= series.items.length - 1;
+        }
 
-  function showByIndex(seriesKey, idx) {
-    const series = SERIES[seriesKey];
-    if (!series) return;
-    activeSeries = seriesKey;
-    activeIdx = Math.max(0, Math.min(series.items.length - 1, idx));
-    const item = series.items[activeIdx];
-    loadInto(item.src, item.title, item.tag);
-    renderNav();
-  }
+        function showByIndex(seriesKey, idx) {
+            const series = SERIES[seriesKey];
+            if (!series) return;
+            activeSeries = seriesKey;
+            activeIdx = Math.max(0, Math.min(series.items.length - 1, idx));
+            const item = series.items[activeIdx];
+            loadInto(item.src, item.title, item.tag);
+            renderNav();
+        }
 
-  function openModal(originEl) {
-    const seriesKey = originEl.getAttribute('data-series');
-    if (seriesKey && SERIES[seriesKey]) {
-      // If the trigger declares which item to start on, honor it; else 0.
-      const startIdx = parseInt(originEl.getAttribute('data-index') || '0', 10);
-      showByIndex(seriesKey, startIdx);
-    } else {
-      activeSeries = null;
-      activeIdx = 0;
-      loadInto(
-        originEl.getAttribute('data-src'),
-        originEl.getAttribute('data-title'),
-        originEl.getAttribute('data-tag'),
-      );
-      renderNav();
-    }
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    lastFocus = originEl || document.activeElement;
-    setTimeout(() => closeBtn.focus(), 0);
-  }
+        function openModal(originEl) {
+            const seriesKey = originEl.getAttribute('data-series');
+            if (seriesKey && SERIES[seriesKey]) {
+                // If the trigger declares which item to start on, honor it; else 0.
+                const startIdx = parseInt(originEl.getAttribute('data-index') || '0', 10);
+                showByIndex(seriesKey, startIdx);
+            } else {
+                activeSeries = null;
+                activeIdx = 0;
+                loadInto(
+                    originEl.getAttribute('data-src'),
+                    originEl.getAttribute('data-title'),
+                    originEl.getAttribute('data-tag'),
+                );
+                renderNav();
+            }
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            lastFocus = originEl || document.activeElement;
+            setTimeout(() => closeBtn.focus(), 0);
+        }
 
-  function closeModal() {
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-    frame.src = 'about:blank';     // free the heavy Plotly bundle
-    activeSeries = null;
-    if (lastFocus && typeof lastFocus.focus === 'function') {
-      lastFocus.focus();
-    }
-  }
+        function closeModal() {
+            modal.classList.remove('open');
+            document.body.style.overflow = '';
+            frame.src = 'about:blank';     // free the heavy Plotly bundle
+            activeSeries = null;
+            if (lastFocus && typeof lastFocus.focus === 'function') {
+                lastFocus.focus();
+            }
+        }
 
-  function step(delta) {
-    if (!activeSeries) return;
-    const series = SERIES[activeSeries];
-    const next = activeIdx + delta;
-    if (next < 0 || next >= series.items.length) return;
-    showByIndex(activeSeries, next);
-  }
+        function step(delta) {
+            if (!activeSeries) return;
+            const series = SERIES[activeSeries];
+            const next = activeIdx + delta;
+            if (next < 0 || next >= series.items.length) return;
+            showByIndex(activeSeries, next);
+        }
 
-  frame.addEventListener('load', () => {
-    if (frame.src && !frame.src.endsWith('about:blank')) {
-      modalBody.classList.add('loaded');
-    }
-  });
+        frame.addEventListener('load', () => {
+            if (frame.src && !frame.src.endsWith('about:blank')) {
+                modalBody.classList.add('loaded');
+            }
+        });
 
-  // Wire every trigger
-  document.querySelectorAll('.open-modal, .hot').forEach(el => {
-    el.addEventListener('click', e => {
-      e.preventDefault();
-      // A trigger needs either data-src or data-series to do anything.
-      if (!el.getAttribute('data-src') && !el.getAttribute('data-series')) return;
-      openModal(el);
-    });
-  });
+        // Wire every trigger
+        document.querySelectorAll('.open-modal, .hot').forEach(el => {
+            el.addEventListener('click', e => {
+                e.preventDefault();
+                // A trigger needs either data-src or data-series to do anything.
+                if (!el.getAttribute('data-src') && !el.getAttribute('data-series')) return;
+                openModal(el);
+            });
+        });
 
-  closeBtn.addEventListener('click', closeModal);
-  prevBtn.addEventListener('click', () => step(-1));
-  nextBtn.addEventListener('click', () => step(+1));
-  modal.addEventListener('click', e => {
-    if (e.target === modal) closeModal();
-  });
-  document.addEventListener('keydown', e => {
-    if (!modal.classList.contains('open')) return;
-    if (e.key === 'Escape') { closeModal(); return; }
-    if (activeSeries) {
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); step(-1); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); step(+1); }
-    }
-  });
-})();
+        closeBtn.addEventListener('click', closeModal);
+        prevBtn.addEventListener('click', () => step(-1));
+        nextBtn.addEventListener('click', () => step(+1));
+        modal.addEventListener('click', e => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', e => {
+            if (!modal.classList.contains('open')) return;
+            if (e.key === 'Escape') {
+                closeModal();
+                return;
+            }
+            if (activeSeries) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    step(-1);
+                }
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    step(+1);
+                }
+            }
+        });
+    })();
 
-/* ============================================================
- * Pipeline pager — flips the starting `data-index` on the three
- * series-driven stage cards (feature, probe, logit). Once the modal
- * is open, the user can still navigate further with the arrows.
- * ============================================================ */
-(function() {
-  const N = 2;        // number of paired examples (feature_0/1, probe_0/1, logit_0/1)
-  let idx = 0;
-  const cards = {
-    feature: document.getElementById('stFeature'),
-    probe:   document.getElementById('stProbe'),
-    logit:   document.getElementById('stLogit'),
-  };
-  const lbl = document.getElementById('exLabel');
+    /* ============================================================
+     * Pipeline pager — flips the starting `data-index` on the three
+     * series-driven stage cards (feature, probe, logit). Once the modal
+     * is open, the user can still navigate further with the arrows.
+     * ============================================================ */
+    (function () {
+        const N = 2;        // number of paired examples (feature_0/1, probe_0/1, logit_0/1)
+        let idx = 0;
+        const cards = {
+            feature: document.getElementById('stFeature'),
+            probe: document.getElementById('stProbe'),
+            logit: document.getElementById('stLogit'),
+        };
+        const lbl = document.getElementById('exLabel');
 
-  function go(newIdx) {
-    idx = (newIdx + N) % N;
-    cards.feature.setAttribute('data-index', String(idx));
-    cards.probe.setAttribute('data-index',   String(idx));
-    cards.logit.setAttribute('data-index',   String(idx));
-    lbl.textContent = `Example ${idx + 1} of ${N}`;
-  }
-  document.getElementById('prevEx').addEventListener('click', () => go(idx - 1));
-  document.getElementById('nextEx').addEventListener('click', () => go(idx + 1));
-})();
+        function go(newIdx) {
+            idx = (newIdx + N) % N;
+            cards.feature.setAttribute('data-index', String(idx));
+            cards.probe.setAttribute('data-index', String(idx));
+            cards.logit.setAttribute('data-index', String(idx));
+            lbl.textContent = `Example ${idx + 1} of ${N}`;
+        }
+
+        document.getElementById('prevEx').addEventListener('click', () => go(idx - 1));
+        document.getElementById('nextEx').addEventListener('click', () => go(idx + 1));
+    })();
 </script>
 
 </body>
