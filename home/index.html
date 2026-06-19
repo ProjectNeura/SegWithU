@@ -973,7 +973,7 @@
         function closeModal() {
             modal.classList.remove('open');
             document.body.style.overflow = '';
-            frame.src = 'about:blank';     // free the heavy Plotly bundle
+            frame.src = 'about:blank';     // unload the interactive plot
             activeSeries = null;
             if (lastFocus && typeof lastFocus.focus === 'function') {
                 lastFocus.focus();
