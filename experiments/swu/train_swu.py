@@ -38,7 +38,7 @@ def train_swu(cfg: ExpConfig) -> None:
     trainer.tap_module_names = ("upsamples.1.conv_block", "upsamples.2.conv_block", "output_block")
     trainer.tap_channels = (256, 128, 32)
     trainer.feature_ch = 32
-    trainer.train(100, note=f"train_swu, cfg={asdict(cfg)}", ema=False, compile_model=False,
+    trainer.train(200, note=f"train_swu, cfg={asdict(cfg)}", ema=False, compile_model=False,
                   early_stop_tolerance=10)
     target_folder = f"{trainer.trainer_folder()}/{trainer.trainer_variant()}/fold{cfg.fold}"
     if exists(target_folder):
